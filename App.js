@@ -48,6 +48,7 @@ export default function App() {
           showsHorizontalScrollIndicator={false}>
             {MyOrders.map((order, index) => (
               <Card 
+              key = {index}
               CartTitle= {order.cart_title}
               Image= {order.image}
               Progress={order.progress}
