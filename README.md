@@ -1,5 +1,5 @@
 #Cartz React Application
 
-`yarn install`
+```yarn install```
 
-`expo start`
+```expo start```
