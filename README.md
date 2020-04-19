@@ -1,5 +1,8 @@
-#Cartz React Application
+# Cartz React Application
 
-```yarn install```
+## Install all Packages
+` yarn install `
 
-```expo start```
+
+## Start Project
+` expo start `
