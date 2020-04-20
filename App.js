@@ -4,14 +4,16 @@ import styled from 'styled-components';
 import Card from './components/card';
 import { Ionicons } from '@expo/vector-icons';
 import Action from './components/Action';
+import Cart from './components/Cartz';
+import Menu from './components/Menu';
 
 
 export default function App() {
   return (
     <Container>
+      <Menu />
       <SafeAreaView>
         <ScrollView style={{height:"100%"}}>
-
           <TitleBar>
             <Avatar source={require('./assets/avatar.jpg')} />
             <Title>Welcome back!</Title>
@@ -30,7 +32,7 @@ export default function App() {
           showsHorizontalScrollIndicator={false}>    
             <Action 
             Image={require('./assets/logo-swift.png')}
-            Text="Request a Cart" />
+            Text="Schedule Cart" />
             
             <Action 
             Image={require('./assets/logo-vue.png')}
@@ -56,10 +58,20 @@ export default function App() {
               Time={order.order_time} />
             ))}    
             </ScrollView>
+            <Subtitle>Scheduled Cartz</Subtitle>
+            {CartzNearby.map((cart, index) => (
+                <Cart 
+                  key={index}
+                  Image={cart.Image}
+                  Market_name={cart.Market_name}
+                  Time={cart.order_time}
+                  Deliverer={cart.Deliverer} 
+                />
+            ))}
           </ScrollView>
+
         </SafeAreaView>
     </Container>
-
   );
 }
 
@@ -125,5 +137,20 @@ const MyOrders = [
     progress: 'done',
     order_title: "Asian Food Marker",
     order_time: "Sunday @ 2 PM"
+  }
+]
+
+const CartzNearby = [
+  {
+    Market_name: "Walmart",
+    Image: require('./assets/walmart.jpeg'),
+    Deliverer: "Huzaifa",
+    order_time: "Sunday @ 2 PM"
+  },
+  {
+    Market_name: "Asian Food Market",
+    Image: require('./assets/asian_food_market.jpg'),
+    Deliverer: "Edison",
+    order_time: "Sunday, 3 PM"
   }
 ]
