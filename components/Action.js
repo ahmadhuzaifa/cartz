@@ -10,7 +10,6 @@ const Action = props => (
 )
 export default Action
 
-
 const Container = styled.View `
     flex-direction: row;
     background: white;

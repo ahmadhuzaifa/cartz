@@ -2,22 +2,47 @@ import React from "react";
 import styled from 'styled-components';
 import { Animated, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
- 
+import MenuItem from "./MenuItems";
+import { connect } from "react-redux"
+
 const ScreenHeight = Dimensions.get("window").height;
+
+function mapStateToProps(state){
+    return { action: state.action }
+}
+
+function mapDispatchToProps(dispatch){
+    return {
+        closeMenu: () => dispatch({
+            type: "CLOSE_MENU"
+        })
+    }
+}
+    
 
 class Menu extends React.Component {
     state = {
         top: new Animated.Value(ScreenHeight)
     };
     componentDidMount() {
-        Animated.spring(this.state.top, {
-            toValue: 0
-          }).start();
+        this.toggleMenu()
     }
-    toggleMenu = props => {
-        Animated.spring(this.state.top, {
-            toValue: ScreenHeight
-          }).start();
+
+    componentDidUpdate() {
+        this.toggleMenu();
+    }
+
+    toggleMenu = () => {
+        if (this.props.action == "openMenu"){
+            Animated.spring(this.state.top, {
+                toValue: 0
+              }).start();    
+        }
+        if (this.props.action == "closeMenu"){
+            Animated.spring(this.state.top, {
+                toValue: ScreenHeight
+              }).start();
+        }
     }
 
     render(){
@@ -29,7 +54,7 @@ class Menu extends React.Component {
                     <Subtitle>ahmadhuzaifa012@gmail.com</Subtitle>
                 </Cover>
                 <TouchableOpacity
-                onPress={this.toggleMenu}
+                onPress={this.props.closeMenu}
                 style={{
                     position: "absolute",
                     top: 180,
@@ -44,12 +69,17 @@ class Menu extends React.Component {
                             color="#546bfb"/>
                     </CloseView>
                 </TouchableOpacity>
-                <Content />
+
+                <Content>
+                    {MenuItemsList.map((item, index) => (
+                        <MenuItem icon={item.icon} title={item.title} text={item.text} />
+                    ))}
+                </Content>
             </AnimatedContainer>
         );
     }
 }
-export default Menu
+export default connect(mapStateToProps, mapDispatchToProps)(Menu)
 
 const CloseView = styled.View`
   width: 44px;
@@ -76,12 +106,13 @@ const Cover = styled.View `
     height: 202px;
     background:black;
     justify-content: center;
-    align-items: center;`
-
-const Content = styled.Text `
+    align-items: center;
+`;
+const Content = styled.View `
     height: ${ScreenHeight};
-    background: #f0f3f5;
-`
+    background: white;
+    padding: 50px;
+`;
 const Image = styled.Image`
     position:absolute;
     height: 100%;
@@ -97,3 +128,27 @@ const Subtitle = styled.Text`
     font-size: 15px;
     color: rgba(255,255,255,0.5)
     `
+
+
+const MenuItemsList = [
+    {
+        icon: "ios-settings",
+        title: "Account",
+        text: "Setting"
+    },
+    {
+        icon: "ios-card",
+        title: "Billing",
+        text: "payments"
+    },
+    {
+        icon: "ios-compass",
+        title: "Billing",
+        text: "payments"
+    },
+    {
+        icon: "ios-exit",
+        title: "Logout",
+        text: "See you soon!"
+    }
+]
