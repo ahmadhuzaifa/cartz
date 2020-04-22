@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, SafeAreaView, TouchableOpacity, Animated, Easing } from 'react-native';
+import { ScrollView, SafeAreaView, TouchableOpacity, Animated, Easing, StatusBar } from 'react-native';
 import styled from 'styled-components';
 import Card from '../components/card';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import Action from '../components/Action';
 import Cart from '../components/Cartz';
 import Menu from '../components/Menu';
 import { connect } from "react-redux"
+import Avatar from '../components/Avatar';
 
 function mapStateToProps(state){
     return { action: state.action }
@@ -22,84 +23,109 @@ function mapDispatchToProps(dispatch){
 
 class HomeScreen extends React.Component {
     state = {
-        scale: new Animated.Value(1)
+        scale: new Animated.Value(1), 
+        opacity: new Animated.Value(1)
     };
-
     componentDidUpdate(){
         this.toggleMenu()
     }
+    componentDidMount(){
+        StatusBar.setBarStyle("dark-content", true)
+    }
     toggleMenu = () => {
         if(this.props.action == "openMenu"){
-            Animated.spring(this.state.scale, {
-                toValue: 0.9
+            Animated.timing(this.state.scale, {
+                toValue: 0.9,
+                duration: 200,
+                easing: Easing.in()
             }).start()
+            Animated.spring(this.state.opacity, {
+                toValue: 0.5
+            }).start()
+            StatusBar.setBarStyle("light-content", true)
+        }
+        if(this.props.action == "closeMenu"){
+            Animated.timing(this.state.scale, {
+                toValue: 1,
+                duration: 300,
+                easing: Easing.in()
+            }).start()
+            Animated.spring(this.state.opacity, {
+                toValue: 1
+            }).start()
+            StatusBar.setBarStyle("dark-content", true)
         }
     }
     render(){
         return (
-            <AnimatedContainer>
-              <Menu />
-              <SafeAreaView>
-                <ScrollView style={{height:"100%"}}>
-                  <TitleBar>
-                    <TouchableOpacity onPress={this.props.openMenu}>
-                        <Avatar source={require('../assets/avatar.jpg')} />
-                    </TouchableOpacity>
-                    <Title>Welcome back!</Title>
-                    <Name>Huzaifa</Name>
-                    <Ionicons 
-                    name="ios-notifications" 
-                    size={32} 
-                    color="#4775f2"
-                    style={{ position: "absolute", right:20, top:5}} />
-                  </TitleBar>
-                  <Subtitle>Shortcuts</Subtitle>
-        
-                  <ScrollView 
-                  horizontal={true} 
-                  style={{paddingBottom:15, paddingTop:15, flexDirection:"row"}} 
-                  showsHorizontalScrollIndicator={false}>    
-                    <Action 
-                    Image={require('../assets/logo-swift.png')}
-                    Text="Schedule Cart" />
-                    
-                    <Action 
-                    Image={require('../assets/logo-vue.png')}
-                    Text="Pick Food Up" />
-                    
-                    <Action 
-                    Image={require('../assets/logo-vue.png')}
-                    Text="Schedule Leave Time" />
-                  </ScrollView>
-        
-                  <Subtitle>MY ORDERS</Subtitle>
-                  <ScrollView 
-                  horizontal={true} 
-                  style={{paddingBottom:30}} 
-                  showsHorizontalScrollIndicator={false}>
-                    {MyOrders.map((order, index) => (
-                      <Card 
-                      key = {index}
-                      CartTitle= {order.cart_title}
-                      Image= {order.image}
-                      Progress={order.progress}
-                      Caption={order.order_title}
-                      Time={order.order_time} />
-                    ))}    
+            <RootView>
+                <Menu />
+                <AnimatedContainer style={{ transform: [{scale: this.state.scale}],
+                 opacity: this.state.opacity }}>
+                <SafeAreaView>
+                    <ScrollView style={{height:"100%"}}>
+                    <TitleBar>
+                        <TouchableOpacity onPress={this.props.openMenu}  style={{position:'absolute', top:0, left:20}}>
+                            <Avatar />
+                            {/* <Avatar source={require('../assets/avatar.jpg')} style={{position:'absolute', top:0, left:-50}} /> */}
+                        </TouchableOpacity>
+                        <Title>Welcome back!</Title>
+                        <Name>Huzaifa</Name>
+                        <Ionicons 
+                        name="ios-notifications" 
+                        size={32} 
+                        color="#4775f2"
+                        style={{ position: "absolute", right:20, top:5}} />
+                    </TitleBar>
+                    <Subtitle>Shortcuts</Subtitle>
+            
+                    <ScrollView 
+                    horizontal={true} 
+                    style={{paddingBottom:15, paddingTop:15, flexDirection:"row"}} 
+                    showsHorizontalScrollIndicator={false}>    
+                        <Action 
+                        Image={require('../assets/logo-swift.png')}
+                        Text="Leaving" />
+                        
+                        <Action 
+                        Image={require('../assets/logo-sketch.png')}
+                        Text="Deliver Food" />
+                        
+                        <Action 
+                        Image={require('../assets/logo-vue.png')}
+                        Text="Schedule Leave Time" />
+                    </ScrollView>
+            
+                    <Subtitle>MY ORDERS</Subtitle>
+                    <ScrollView 
+                    horizontal={true} 
+                    style={{paddingBottom:30}} 
+                    showsHorizontalScrollIndicator={false}>
+                        {MyOrders.map((order, index) => (
+                          <TouchableOpacity key = {index}>
+                          <Card 
+                          CartTitle= {order.cart_title}
+                          Image= {order.image}
+                          Progress={order.progress}
+                          Caption={order.order_title}
+                          Time={order.order_time} />
+                          </TouchableOpacity>
+                          ))}  
                     </ScrollView>
                     <Subtitle>Scheduled Cartz</Subtitle>
                     {CartzNearby.map((cart, index) => (
                         <Cart 
-                          key={index}
-                          Image={cart.Image}
-                          Market_name={cart.Market_name}
-                          Time={cart.order_time}
-                          Deliverer={cart.Deliverer} 
+                        key={index}
+                        Image={cart.Image}
+                        Market_name={cart.Market_name}
+                        Time={cart.order_time}
+                        Deliverer={cart.Deliverer} 
                         />
                     ))}
-                  </ScrollView>
-                </SafeAreaView>
-            </AnimatedContainer>
+                    </ScrollView>
+                    </SafeAreaView>
+                </AnimatedContainer>
+            </RootView>
           );
     }
 
@@ -109,6 +135,11 @@ export default connect(
     mapDispatchToProps
     )
     (HomeScreen)
+
+const RootView = styled.View`
+    background:black;
+    flex: 1;
+`
 
 const Subtitle = styled.Text`
   color:#C8C8C8;
@@ -124,19 +155,12 @@ const Subtitle = styled.Text`
 const Container = styled.View`
   flex: 1;
   background-color: #f0f3f5;
+  border-radius: 10px;
+  overflow: hidden;
 `; 
 
 const AnimatedContainer = Animated.createAnimatedComponent(Container)
 
-const Avatar = styled.Image`
-  width:44px;
-  height: 44px;
-  background: gray;
-  border-radius: 22px;
-  margin-left: 22px;
-  top:0;
-  left:0;
-`
 
 const Title = styled.Text`
   font-size: 16px;
@@ -160,8 +184,8 @@ const TitleBar = styled.View`
 
 const MyOrders = [
   {
-    cart_title: "Asian Food Market",
-    image: require('../assets/background1.jpg'),
+    cart_title: "Asiansa Food Market",
+    image: require('../assets/background13.jpg'),
     progress: 'alert',
     order_title: "Asian Food Marker",
     order_time: "Sunday @ 2 PM"
@@ -170,7 +194,7 @@ const MyOrders = [
     cart_title: "Asian Food Market",
     image: require('../assets/background1.jpg'),
     progress: 'done',
-    order_title: "Asian Food Marker",
+    order_title: "Asian Food Markert",
     order_time: "Sunday @ 2 PM"
   }
 ]
