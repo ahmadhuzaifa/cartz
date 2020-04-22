@@ -26,6 +26,9 @@ class HomeScreen extends React.Component {
         scale: new Animated.Value(1), 
         opacity: new Animated.Value(1)
     };
+    static navigationOptions = {
+      header:null
+    }
     componentDidUpdate(){
         this.toggleMenu()
     }
@@ -102,7 +105,12 @@ class HomeScreen extends React.Component {
                     style={{paddingBottom:30}} 
                     showsHorizontalScrollIndicator={false}>
                         {MyOrders.map((order, index) => (
-                          <TouchableOpacity key = {index}>
+                          <TouchableOpacity 
+                          key = {index}
+                          onPress={()=>{
+                            this.props.navigation.navigate("Order", {
+                                order: order
+                            })}} >
                           <Card 
                           CartTitle= {order.cart_title}
                           Image= {order.image}
@@ -188,14 +196,18 @@ const MyOrders = [
     image: require('../assets/background13.jpg'),
     progress: 'alert',
     order_title: "Asian Food Marker",
-    order_time: "Sunday @ 2 PM"
+    order_time: "Sunday @ 2 PM",
+    deliverer: "Huzaifa Ahmad",
+    deliverer_image: require('../assets/avatar.jpg')
   },
   {
     cart_title: "Asian Food Market",
     image: require('../assets/background1.jpg'),
     progress: 'done',
     order_title: "Asian Food Markert",
-    order_time: "Sunday @ 2 PM"
+    order_time: "Sunday @ 2 PM",
+    deliverer: "Edison Li",
+    deliverer_image: require('../assets/avatar.jpg')
   }
 ]
 
