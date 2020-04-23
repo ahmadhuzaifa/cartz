@@ -9,6 +9,11 @@ import Menu from '../components/Menu';
 import { connect } from "react-redux"
 import Avatar from '../components/Avatar';
 
+import firebase from '@firebase/app';
+require('firebase/auth');
+
+
+
 function mapStateToProps(state){
     return { action: state.action }
 }
@@ -24,7 +29,9 @@ function mapDispatchToProps(dispatch){
 class HomeScreen extends React.Component {
     state = {
         scale: new Animated.Value(1), 
-        opacity: new Animated.Value(1)
+        opacity: new Animated.Value(1),
+        email: "",
+        displayName:""
     };
     static navigationOptions = {
       header:null
@@ -33,7 +40,15 @@ class HomeScreen extends React.Component {
         this.toggleMenu()
     }
     componentDidMount(){
-        StatusBar.setBarStyle("dark-content", true)
+      const {email, displayName} = firebase.auth().currentUser
+
+      this.setState({email, displayName});
+
+      StatusBar.setBarStyle("dark-content", true)
+    }
+
+    signOutUser = () => {
+      firebase.auth().signOut();
     }
     toggleMenu = () => {
         if(this.props.action == "openMenu"){
@@ -73,7 +88,7 @@ class HomeScreen extends React.Component {
                             {/* <Avatar source={require('../assets/avatar.jpg')} style={{position:'absolute', top:0, left:-50}} /> */}
                         </TouchableOpacity>
                         <Title>Welcome back!</Title>
-                        <Name>Huzaifa</Name>
+                        <Name>Hi {this.state.displayName}!</Name>
                         <Ionicons 
                         name="ios-notifications" 
                         size={32} 

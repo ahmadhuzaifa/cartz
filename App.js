@@ -22,7 +22,7 @@ const reducer = (state = initialState, action) => {
 const store = createStore(reducer)
 
 const App = () => (
-  <Provider store={store}>
+  <Provider store={store}> 
     <AppNavigator />
   </Provider>
 )

@@ -4,6 +4,11 @@ import { Animated, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MenuItem from "./MenuItems";
 import { connect } from "react-redux"
+import { ScrollView } from "react-native-gesture-handler";
+
+
+import firebase from '@firebase/app';
+require('firebase/auth');
 
 const ScreenHeight = Dimensions.get("window").height;
 
@@ -32,6 +37,9 @@ class Menu extends React.Component {
         this.toggleMenu();
     }
 
+    signOutUser = () => {
+        firebase.auth().signOut();
+    }
     toggleMenu = () => {
         if (this.props.action == "openMenu"){
             Animated.spring(this.state.top, {
@@ -48,33 +56,38 @@ class Menu extends React.Component {
     render(){
         return (
             <AnimatedContainer style={{ top: this.state.top }}>
-                <Cover>
-                    <Image source={require("../assets/background2.jpg")}></Image>
-                    <Title>Huzaifa Ahmad</Title>
-                    <Subtitle>ahmadhuzaifa012@gmail.com</Subtitle>
-                </Cover>
-                <TouchableOpacity
-                onPress={this.props.closeMenu}
-                style={{
-                    position: "absolute",
-                    top: 180,
-                    left: "50%",
-                    marginLeft: -22,
-                    zIndex: 1
-                }}>
-                    <CloseView>
-                        <Ionicons 
-                            name="ios-close" 
-                            size={32} 
-                            color="#546bfb"/>
-                    </CloseView>
-                </TouchableOpacity>
-
-                <Content>
-                    {MenuItemsList.map((item, index) => (
-                        <MenuItem icon={item.icon} title={item.title} text={item.text} />
-                    ))}
-                </Content>
+                <ScrollView>
+                    <Cover>
+                        <Image source={require("../assets/background2.jpg")}></Image>
+                        <Title>Huzaifa Ahmad</Title>
+                        <Subtitle>ahmadhuzaifa012@gmail.com</Subtitle>
+                    </Cover>
+                    <TouchableOpacity
+                    onPress={this.props.closeMenu}
+                    style={{
+                        position: "absolute",
+                        top: 180,
+                        left: "50%",
+                        marginLeft: -22,
+                        zIndex: 1
+                    }}>
+                        <CloseView>
+                            <Ionicons 
+                                name="ios-close" 
+                                size={32} 
+                                color="#546bfb"/>
+                        </CloseView>
+                    </TouchableOpacity>
+                    <Content>
+                        <MenuItem icon="ios-settings" title="Account" text="Setting" />
+                        <MenuItem icon="ios-card" title="Billing" text="Payment" />
+                        <MenuItem icon="ios-settings" title="History" text="My Orders" />
+                        <TouchableOpacity
+                        onPress={this.signOutUser}>
+                            <MenuItem icon="ios-exit" title="Logout" text="See you soon!" />
+                        </TouchableOpacity>
+                    </Content>
+                </ScrollView>
             </AnimatedContainer>
         );
     }
