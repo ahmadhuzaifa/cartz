@@ -8,7 +8,8 @@ import TabNavigator from "./TabBar";
 import LoadingScreen from "../screens/loadingScreen.js";
 import RegisterScreen from "../screens/registerScreen";
 import LoginScreen from "../screens/loginScreen";
-
+import PhoneNumberScreen from "../screens/phoneNumberScreen";
+import AddAdress from "../screens/addAddress"
 import firebase from '@firebase/app';
 require('firebase/auth');
 
@@ -38,11 +39,21 @@ const AuthStack = createStackNavigator({
     RegisterScreen: RegisterScreen
 })
 
+const VerificationStack = createStackNavigator({
+    PhoneNumberScreen: PhoneNumberScreen
+})
+
+const FinalAuthStack = createStackNavigator({
+    AddAdress: AddAdress
+})
+
 export default createAppContainer(
     createSwitchNavigator({
         Loading: LoadingScreen, 
         App: TabNavigator,
-        Auth: AuthStack
+        Auth: AuthStack,
+        Auth2Stack: VerificationStack,
+        FinalAuthStack: FinalAuthStack
     },
     {
         initialRouteName:"Loading"

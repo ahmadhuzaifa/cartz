@@ -2,14 +2,14 @@ import React from "react"
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView } from "react-native"
 import { Ionicons } from '@expo/vector-icons';
 import firebase from '@firebase/app';
+import firestore from '@react-native-firebase/firestore';
+
 require('firebase/auth');
 
-export default class LoginScreen extends React.Component{
+export default class AddAdress extends React.Component{
 
     state = { 
-        email: "",
-        password:"",
-        name: "",
+        address: "",
         errorMessage:null
     }
 
@@ -17,15 +17,19 @@ export default class LoginScreen extends React.Component{
         headerShown:false
     }
 
-    handleSignup = () =>{
-        firebase.auth()
-        .createUserWithEmailAndPassword(this.state.email, this.state.password)
-        .then(userCredentials => {
-            userCredentials.user.updateProfile({
-                displayName: this.state.name
-            })
+    handlePost = () =>{
+        const user = firebase.auth().currentUser;
+        const user_id = user.uid
+
+        firestore()
+        .collection('Users')
+        .doc(user_id).set({
+            name: user.displayName,
+            email: user.email,
+            photoUrl: user.photoURL,
+            address: this.state.address
         })
-        .catch(error => this.setState({ errorMessage: error.message }))
+
     }
 
     render(){
@@ -47,42 +51,23 @@ export default class LoginScreen extends React.Component{
                         <Text style={styles.topBarText}>Register</Text>
                     </View>
                     <ScrollView keyboardDismissMode={true}>
-                    <Text style={styles.greeting}>{`Welomce \nto Cartz!`}</Text>
+                    <Text style={styles.greeting}>{`What's your \nAddress?`}</Text>
                     <View style={styles.errorMessage}>
                         {this.state.errorMessage && <Text style={styles.error}>{this.state.errorMessage}</Text>}
                     </View>
                     <View style={styles.form}>
                         <View>
-                            <Text style={styles.inputTitle}>Email Address</Text>
+                            <Text style={styles.inputTitle}>Address</Text>
                             <TextInput 
                             style={styles.input} 
                             autoCapitalize="none" 
-                            onChangeText={ email => this.setState({email})}
-                            value={this.state.email}
+                            onChangeText={ address => this.setState({address})}
+                            value={this.state.address}
                             />
                         </View>
-                        <View style={{marginTop:32}}>
-                            <Text style={styles.inputTitle}>Name</Text>
-                            <TextInput 
-                            style={styles.input} 
-                            autoCapitalize="none"
-                            onChangeText={ name => this.setState({name})}
-                            value={this.state.name}
-                            ></TextInput>
-                        </View>   
-                        <View style={{marginTop:32}}>
-                            <Text style={styles.inputTitle}>Password</Text>
-                            <TextInput 
-                            style={styles.input} 
-                            secureTextEntry 
-                            autoCapitalize="none"
-                            onChangeText={ password => this.setState({password})}
-                            value={this.state.password}
-                            ></TextInput>
-                        </View>   
                     </View>
                     <View>
-                        <TouchableOpacity style={styles.button} onPress={this.handleSignup}>
+                        <TouchableOpacity style={styles.button} onPress={this.handlePost}>
                             <Text style={styles.buttonText}>Sign Up</Text>
                         </TouchableOpacity>
                     </View>

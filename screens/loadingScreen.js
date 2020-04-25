@@ -6,7 +6,16 @@ require('firebase/auth');
 export default class LoadingScreen extends React.Component{
     componentDidMount(){
         firebase.auth().onAuthStateChanged(user=>{
-            this.props.navigation.navigate(user ? "App" : "Auth")
+            var stack = "Auth"
+            if (user){
+                if (user.phoneNumber){
+                    stack = "App"
+                }
+                else{
+                    stack = "Auth2Stack"
+                }
+            }
+            this.props.navigation.navigate(stack)
         })
     }
     render(){
