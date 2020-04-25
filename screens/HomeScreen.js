@@ -41,9 +41,7 @@ class HomeScreen extends React.Component {
     }
     componentDidMount(){
       const {email, displayName} = firebase.auth().currentUser
-
       this.setState({email, displayName});
-
       StatusBar.setBarStyle("dark-content", true)
     }
 
@@ -85,7 +83,6 @@ class HomeScreen extends React.Component {
                     <TitleBar>
                         <TouchableOpacity onPress={this.props.openMenu}  style={{position:'absolute', top:0, left:20}}>
                             <Avatar />
-                            {/* <Avatar source={require('../assets/avatar.jpg')} style={{position:'absolute', top:0, left:-50}} /> */}
                         </TouchableOpacity>
                         <Title>Welcome back!</Title>
                         <Name>Hi {this.state.displayName}!</Name>
@@ -99,19 +96,23 @@ class HomeScreen extends React.Component {
             
                     <ScrollView 
                     horizontal={true} 
-                    style={{paddingBottom:15, paddingTop:15, flexDirection:"row"}} 
-                    showsHorizontalScrollIndicator={false}>    
+                    style={{paddingBottom:20, paddingTop:15, flexDirection:"row"}} 
+                    showsHorizontalScrollIndicator={false}>
+                      <TouchableOpacity>
                         <Action 
-                        Image={require('../assets/logo-swift.png')}
+                        Image={require('../assets/leaving.png')}
                         Text="Leaving" />
-                        
+                      </TouchableOpacity>    
+                      <TouchableOpacity>
                         <Action 
-                        Image={require('../assets/logo-sketch.png')}
+                        Image={require('../assets/truck.png')}
                         Text="Deliver Food" />
-                        
+                      </TouchableOpacity>    
+                      <TouchableOpacity>
                         <Action 
                         Image={require('../assets/logo-vue.png')}
                         Text="Schedule Leave Time" />
+                      </TouchableOpacity>    
                     </ScrollView>
             
                     <Subtitle>MY ORDERS</Subtitle>
@@ -162,6 +163,7 @@ export default connect(
 const RootView = styled.View`
     background:black;
     flex: 1;
+    font-family: "Avenir Next";
 `
 
 const Subtitle = styled.Text`
@@ -171,15 +173,17 @@ const Subtitle = styled.Text`
   margin-left: 20px;
   margin-top: 20px;
   text-transform: uppercase;
+  font-family: "Avenir Next";
+
 `
 
 
 
 const Container = styled.View`
   flex: 1;
-  background-color: #f0f3f5;
-  border-radius: 10px;
+  background-color: white;
   overflow: hidden;
+
 `; 
 
 const AnimatedContainer = Animated.createAnimatedComponent(Container)
@@ -189,12 +193,15 @@ const Title = styled.Text`
   font-size: 16px;
   color: #b8bece;
   font-weight: 500;  
+  font-family: "Avenir Next";
+
 `;
 
 const Name = styled.Text`
   font-size: 20px;
-  color: #3c4560;
-  font-weight: bold;  
+  color: black;
+  font-weight: bold; 
+ 
 `;
 
 

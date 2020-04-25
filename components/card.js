@@ -50,13 +50,13 @@ const Progress = styled.Image`
 
 
 const Container = styled.View`
-    background-color: white;
+    background: #f0f3f5;
     width: 318px;
     height: 200px;
     border-radius: 14px;
     margin-left: 20px;
     margin-top: 20px;
-    box-shadow; 0 5px 15px rgba(0,0,0,0.15);
+    box-shadow; 0 5px 15px rgba(0,0,0,0.25);
 `;
 
 

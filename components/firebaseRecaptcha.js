@@ -43,6 +43,7 @@ export default function VerifyRecaptcha(props) {
                 firebase.auth().currentUser.linkWithPhoneNumber(phoneNumber, recaptchaVerifierRef.current)
                 .then(function (confirmationResult) {
                     if(confirmationResult){
+                        changeErrorMessage("")
                         setVerificationID(verifcationId)
                         changeVerification(true)
                         changeConfirmation(confirmationResult)
@@ -71,9 +72,11 @@ export default function VerifyRecaptcha(props) {
                         confirmation.confirm(code).then(function (result) {
                             console.log(result)
                             //NEED TO ADD CODE HERE
+                            changeErrorMessage("")                            
+
 
                         }).catch(function (error) {
-                            console.log(error);
+                            changeErrorMessage(error.message)                            
                         });
                     }}
                 >

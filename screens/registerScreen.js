@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAr
 import { Ionicons } from '@expo/vector-icons';
 import firebase from '@firebase/app';
 require('firebase/auth');
+require('firebase/firestore');
 
 export default class LoginScreen extends React.Component{
 
@@ -24,13 +25,18 @@ export default class LoginScreen extends React.Component{
             userCredentials.user.updateProfile({
                 displayName: this.state.name
             })
+            const uid = userCredentials.user.uid
+            firebase.firestore().collection("users").doc(uid).set({
+                name: this.state.name,
+                email: this.state.email,
+                address: this.state.address,
+            })
         })
         .catch(error => this.setState({ errorMessage: error.message }))
     }
 
     render(){
         return(
-
             <View style={styles.container}>
                 <SafeAreaView style={{flex:1}}>
                     <View style={styles.topBar} >
@@ -46,22 +52,13 @@ export default class LoginScreen extends React.Component{
                         </TouchableOpacity>
                         <Text style={styles.topBarText}>Register</Text>
                     </View>
-                    <ScrollView keyboardDismissMode={true}>
+                    <ScrollView keyboardDismissMode={false}>
                     <Text style={styles.greeting}>{`Welomce \nto Cartz!`}</Text>
                     <View style={styles.errorMessage}>
                         {this.state.errorMessage && <Text style={styles.error}>{this.state.errorMessage}</Text>}
                     </View>
                     <View style={styles.form}>
                         <View>
-                            <Text style={styles.inputTitle}>Email Address</Text>
-                            <TextInput 
-                            style={styles.input} 
-                            autoCapitalize="none" 
-                            onChangeText={ email => this.setState({email})}
-                            value={this.state.email}
-                            />
-                        </View>
-                        <View style={{marginTop:32}}>
                             <Text style={styles.inputTitle}>Name</Text>
                             <TextInput 
                             style={styles.input} 
@@ -70,6 +67,24 @@ export default class LoginScreen extends React.Component{
                             value={this.state.name}
                             ></TextInput>
                         </View>   
+                        <View style={{marginTop:32}}>
+                            <Text style={styles.inputTitle}>Address</Text>
+                            <TextInput 
+                            style={styles.input} 
+                            autoCapitalize="none"
+                            onChangeText={ address => this.setState({address})}
+                            value={this.state.address}
+                            ></TextInput>
+                        </View>   
+                        <View style={{marginTop:32}}>
+                            <Text style={styles.inputTitle}>Email Address</Text>
+                            <TextInput 
+                            style={styles.input} 
+                            autoCapitalize="none" 
+                            onChangeText={ email => this.setState({email})}
+                            value={this.state.email}
+                            />
+                        </View>
                         <View style={{marginTop:32}}>
                             <Text style={styles.inputTitle}>Password</Text>
                             <TextInput 
@@ -178,6 +193,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         color:"white",
+        marginBottom: 240
     },
     buttonText:{
         color: "white",

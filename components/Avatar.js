@@ -1,20 +1,21 @@
 import React from "react"
 import styled from "styled-components"
 
+import firebase from '@firebase/app';
+require('firebase/auth');
 
 class Avatar extends React.Component{
     state = {
         photo: "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
     }
     componentDidMount(){
-        // fetch("https://uinames.com/api/?ext")
-        // .then(response => response.json())
-        // .then(response => {
-        //     console.log(response)
-        //     this.setState({
-        //         photo: response.photo
-        //     });
-        // });
+        const photo = firebase.auth().currentUser.photo
+        if (photo){
+            this.setState({
+                photo: photo
+            });
+        }
+
     }
 
     render(){

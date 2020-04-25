@@ -2,6 +2,7 @@ import React from "react"
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native"
 import firebase from '@firebase/app';
 require('firebase/auth');
+require('firebase/firestore');
 
 export default class LoadingScreen extends React.Component{
     componentDidMount(){

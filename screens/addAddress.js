@@ -2,7 +2,7 @@ import React from "react"
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView } from "react-native"
 import { Ionicons } from '@expo/vector-icons';
 import firebase from '@firebase/app';
-import firestore from '@react-native-firebase/firestore';
+// import firestore from '@firestore/';
 
 require('firebase/auth');
 
@@ -34,7 +34,6 @@ export default class AddAdress extends React.Component{
 
     render(){
         return(
-
             <View style={styles.container}>
                 <SafeAreaView style={{flex:1}}>
                     <View style={styles.topBar} >

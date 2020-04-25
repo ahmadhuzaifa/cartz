@@ -59,8 +59,8 @@ class Menu extends React.Component {
                 <ScrollView>
                     <Cover>
                         <Image source={require("../assets/background2.jpg")}></Image>
-                        <Title>Huzaifa Ahmad</Title>
-                        <Subtitle>ahmadhuzaifa012@gmail.com</Subtitle>
+                        <Title>{firebase.auth().currentUser.displayName}</Title>
+                        <Subtitle>{firebase.auth().currentUser.email}</Subtitle>
                     </Cover>
                     <TouchableOpacity
                     onPress={this.props.closeMenu}
