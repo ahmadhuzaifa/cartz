@@ -5,21 +5,34 @@ import HomeScreen from "../screens/HomeScreen";
 import OrderScreen from "../screens/orderScreen"
 import OrdersScreen from "../screens/ordersScreen"
 
-import { Ionicons } from "@expo/vector-icons"
-    
-const activeColor = "#06CFC2";
+import { Ionicons, FontAwesome5, Entypo } from "@expo/vector-icons"
+import AddScheduledRun from "../screens/add_run/add_run";
+import AddScheduledRun2 from "../screens/add_run/add_run2";
+
+const activeColor = "#503D9E";
 const inactiveColor = "#b8bece";
+
+const AddRun = createStackNavigator({
+    AddRun1: AddScheduledRun,
+    AddRun2: AddScheduledRun2
+})
+AddRun.navigationOptions =  {
+    headerShown:false
+}
 
 const HomeStack = createStackNavigator({
     Home: HomeScreen,
-    Order: OrderScreen
-}, {
+    Order: OrderScreen,
+    AddRun: AddRun
+}, 
+{
     mode: "modal"
 });
+
 HomeStack.navigationOptions = ({ navigation }) => {
     var tabBarVisible = true;
     const routeName = navigation.state.routes[navigation.state.index].routeName;
-    if (routeName == "Order") {
+    if (routeName == "Order"  || routeName == "AddRun" )  {
         tabBarVisible = false;
     }
     return {
@@ -35,6 +48,23 @@ HomeStack.navigationOptions = ({ navigation }) => {
     }
 };
 
+
+const PerksStack = createStackNavigator({
+    Order: OrdersScreen
+});
+
+
+PerksStack.navigationOptions = {
+    tabBarLabel: "Perks",
+    tabBarIcon: ({focused}) => (
+        <FontAwesome5
+        name="grin-stars"
+        size={26}
+        color={focused ? activeColor : inactiveColor}
+        />
+    )
+};
+
 const OrderStack = createStackNavigator({
     Order: OrdersScreen
 });
@@ -43,20 +73,20 @@ const OrderStack = createStackNavigator({
 OrderStack.navigationOptions = {
     tabBarLabel: "My Orders",
     tabBarIcon: ({focused}) => (
-        <Ionicons
-        name="ios-pricetags"
+        <Entypo
+        name="shopping-bag"
         size={26}
         color={focused ? activeColor : inactiveColor}
         />
     )
 };
-const ProjectsStack = createStackNavigator({
-    Order: OrderScreen
-});
+
+
 
 
 const TabNavigator = createBottomTabNavigator({
     HomeStack,
+    PerksStack,
     OrderStack
 },
 {

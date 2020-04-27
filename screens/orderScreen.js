@@ -1,9 +1,10 @@
 import React from "react"
 import styled from "styled-components"
-import { Button } from "react-native";
+import { Button, ScrollView } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from "react-native";
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
  
 class OrderScreen extends React.Component {
@@ -23,6 +24,7 @@ class OrderScreen extends React.Component {
         const order = navigation.getParam("order");
         return (
             <Container>
+                <ScrollView>
                 <StatusBar hidden />
                 <Cover>
                     <Image source={order.image} />
@@ -51,6 +53,9 @@ class OrderScreen extends React.Component {
                     <Logo source={order.deliverer_image} />
                     <Subtitle>{order.deliverer}</Subtitle>
                 </Wrapper>
+
+                </ScrollView>
+
             </Container>
 
         )
@@ -64,7 +69,7 @@ flex: 1;
 `;
 
 const Cover = styled.View`
-height: 375px;
+height: 305px;
 `;
 
 const Image = styled.Image`

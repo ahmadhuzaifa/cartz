@@ -6,7 +6,7 @@ import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import firebase from '@firebase/app';
 require('firebase/auth');
 
-import VerifyRecaptcha from "../components/firebaseRecaptcha.js"
+import VerifyRecaptcha from "../../components/firebaseRecaptcha.js"
 
 export default class PhoneNumberScreen extends React.Component{
 

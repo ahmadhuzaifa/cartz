@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
        fontWeight: "600",
        fontSize: 19,
        fontFamily: "Avenir Next",
-        width:"100%",
+       width:"100%",
         textAlign:"center",
         position:"absolute"
     },

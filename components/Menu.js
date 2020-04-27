@@ -58,7 +58,7 @@ class Menu extends React.Component {
             <AnimatedContainer style={{ top: this.state.top }}>
                 <ScrollView>
                     <Cover>
-                        <Image source={require("../assets/background2.jpg")}></Image>
+                        <Image source={require("../assets/background8.jpg")}></Image>
                         <Title>{firebase.auth().currentUser.displayName}</Title>
                         <Subtitle>{firebase.auth().currentUser.email}</Subtitle>
                     </Cover>
@@ -75,7 +75,7 @@ class Menu extends React.Component {
                             <Ionicons 
                                 name="ios-close" 
                                 size={32} 
-                                color="#546bfb"/>
+                                color="#503D9E"/>
                         </CloseView>
                     </TouchableOpacity>
                     <Content>
@@ -102,6 +102,7 @@ const CloseView = styled.View`
   justify-content: center;
   align-items: center;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  background: white;
 `;
 
 const Container = styled.View `
@@ -119,12 +120,12 @@ const AnimatedContainer = Animated.createAnimatedComponent(Container)
 
 const Cover = styled.View `
     height: 202px;
-    background:black;
+    background: #503D9E;
     justify-content: center;
     align-items: center;
 `;
 const Content = styled.View `
-    height: ${ScreenHeight};
+    height: ${ScreenHeight}px;
     background: white;
     padding: 50px;
 `;

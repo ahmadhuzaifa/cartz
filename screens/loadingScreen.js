@@ -13,7 +13,7 @@ export default class LoadingScreen extends React.Component{
                     stack = "App"
                 }
                 else{
-                    stack = "Auth2Stack"
+                    stack = "PhoneNumberAuth"
                 }
             }
             this.props.navigation.navigate(stack)

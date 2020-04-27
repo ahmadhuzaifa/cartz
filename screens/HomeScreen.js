@@ -89,7 +89,7 @@ class HomeScreen extends React.Component {
                         <Ionicons 
                         name="ios-notifications" 
                         size={32} 
-                        color="#4775f2"
+                        color="#503D9E"
                         style={{ position: "absolute", right:20, top:5}} />
                     </TitleBar>
                     <Subtitle>Shortcuts</Subtitle>
@@ -98,7 +98,7 @@ class HomeScreen extends React.Component {
                     horizontal={true} 
                     style={{paddingBottom:20, paddingTop:15, flexDirection:"row"}} 
                     showsHorizontalScrollIndicator={false}>
-                      <TouchableOpacity>
+                      <TouchableOpacity onPress={()=>{this.props.navigation.navigate("AddRun")}}>
                         <Action 
                         Image={require('../assets/leaving.png')}
                         Text="Leaving" />
@@ -106,21 +106,21 @@ class HomeScreen extends React.Component {
                       <TouchableOpacity>
                         <Action 
                         Image={require('../assets/truck.png')}
-                        Text="Deliver Food" />
+                        Text="Deliver" />
                       </TouchableOpacity>    
                       <TouchableOpacity>
                         <Action 
-                        Image={require('../assets/logo-vue.png')}
-                        Text="Schedule Leave Time" />
+                        Image={require('../assets/request.png')}
+                        Text="Request" />
                       </TouchableOpacity>    
                     </ScrollView>
             
-                    <Subtitle>MY ORDERS</Subtitle>
+                    <Subtitle>Scheduled Runs</Subtitle>
                     <ScrollView 
-                    horizontal={true} 
+                    horizontal={false} 
                     style={{paddingBottom:30}} 
                     showsHorizontalScrollIndicator={false}>
-                        {MyOrders.map((order, index) => (
+                        {ScheduledRuns.map((order, index) => (
                           <TouchableOpacity 
                           key = {index}
                           onPress={()=>{
@@ -136,7 +136,7 @@ class HomeScreen extends React.Component {
                           </TouchableOpacity>
                           ))}  
                     </ScrollView>
-                    <Subtitle>Scheduled Cartz</Subtitle>
+                    {/* <Subtitle>Scheduled Cartz</Subtitle>
                     {CartzNearby.map((cart, index) => (
                         <Cart 
                         key={index}
@@ -145,7 +145,7 @@ class HomeScreen extends React.Component {
                         Time={cart.order_time}
                         Deliverer={cart.Deliverer} 
                         />
-                    ))}
+                    ))} */}
                     </ScrollView>
                     </SafeAreaView>
                 </AnimatedContainer>
@@ -164,6 +164,7 @@ const RootView = styled.View`
     background:black;
     flex: 1;
     font-family: "Avenir Next";
+
 `
 
 const Subtitle = styled.Text`
@@ -212,18 +213,36 @@ const TitleBar = styled.View`
 `;
 
 
-const MyOrders = [
+const ScheduledRuns = [
   {
-    cart_title: "Asiansa Food Market",
-    image: require('../assets/background13.jpg'),
-    progress: 'alert',
-    order_title: "Asian Food Marker",
+    cart_title: "GameStop Sacramento",
+    image: require('../assets/background7.jpg'),
+    progress: 'done',
+    order_title: "GameStop",
     order_time: "Sunday @ 2 PM",
     deliverer: "Huzaifa Ahmad",
     deliverer_image: require('../assets/avatar.jpg')
   },
   {
-    cart_title: "Asian Food Market",
+    cart_title: "Walmart",
+    image: require('../assets/walmart.jpeg'),
+    progress: 'done',
+    order_title: "Going to Walmart",
+    order_time: "Sunday @ 2 PM",
+    deliverer: "Edison Li",
+    deliverer_image: require('../assets/avatar.jpg')
+  },
+  {
+    cart_title: "Asians Food Market",
+    image: require('../assets/asian_food_market.jpg'),
+    progress: 'alert',
+    order_title: "Asian Food Market",
+    order_time: "Sunday @ 2 PM",
+    deliverer: "Huzaifa Ahmad",
+    deliverer_image: require('../assets/avatar.jpg')
+  },
+  {
+    cart_title: "Walmart",
     image: require('../assets/background1.jpg'),
     progress: 'done',
     order_title: "Asian Food Markert",

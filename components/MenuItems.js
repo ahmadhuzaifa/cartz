@@ -7,7 +7,7 @@ const MenuItem = props => (
             <Ionicons 
                 name={props.icon}
                 size={24} 
-                color="#546bfb"/>
+                color="#503D9E"/>
         </IconView>
         <Content>
             <Title>{props.title}</Title>

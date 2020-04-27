@@ -51,7 +51,7 @@ const Progress = styled.Image`
 
 const Container = styled.View`
     background: #f0f3f5;
-    width: 318px;
+    width: 330px;
     height: 200px;
     border-radius: 14px;
     margin-left: 20px;
