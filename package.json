@@ -8,12 +8,14 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@firebase/firestore": "^1.14.2",
     "@react-native-community/datetimepicker": "^2.3.2",
     "@react-native-community/masked-view": "0.1.6",
     "expo": "~37.0.3",
     "expo-firebase-recaptcha": "^1.1.0",
     "expo-location": "~8.1.0",
     "firebase": "7.9.0",
+    "firestore": "^1.1.6",
     "frisbee": "^3.1.2",
     "react": "~16.9.0",
     "react-dom": "~16.9.0",

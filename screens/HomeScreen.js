@@ -4,13 +4,13 @@ import styled from 'styled-components';
 import Card from '../components/card';
 import { Ionicons } from '@expo/vector-icons';
 import Action from '../components/Action';
-import Cart from '../components/Cartz';
 import Menu from '../components/Menu';
 import { connect } from "react-redux"
 import Avatar from '../components/Avatar';
-
+import Moment from 'moment'
 import firebase from '@firebase/app';
 require('firebase/auth');
+require('firebase/firestore');
 
 
 
@@ -31,10 +31,11 @@ class HomeScreen extends React.Component {
         scale: new Animated.Value(1), 
         opacity: new Animated.Value(1),
         email: "",
-        displayName:""
+        displayName:"",
+        runs_array:[]
     };
     static navigationOptions = {
-      header:null
+      headerShown:false
     }
     componentDidUpdate(){
         this.toggleMenu()
@@ -43,6 +44,54 @@ class HomeScreen extends React.Component {
       const {email, displayName} = firebase.auth().currentUser
       this.setState({email, displayName});
       StatusBar.setBarStyle("dark-content", true)
+      this.getRuns()
+      this.checkAddress()
+    }
+    async checkAddress(){
+      const uid = firebase.auth().currentUser.uid
+      const apiURL = `https://afternoon-brook-22773.herokuapp.com/api/users/${uid}`;
+      fetch(apiURL, {
+          method: 'GET'
+      })
+      .then((response) => {
+        response.text()
+        if(response.status == 200 ||response.status == 201 ||response.status == 400){
+          this.props.navigation.navigate("App")
+        }
+        else{
+          this.props.navigation.navigate("AddAddress")
+        }})
+      .catch((error) => {
+          console.error(error);
+          return "AddAddress"
+      });
+    }
+
+    getRuns() {
+      const runs_array = []
+      this.setState({runs_array:[]})
+
+      const uid = firebase.auth().currentUser.uid
+      firebase.firestore().collection("runs").onSnapshot(querySnapshot => {
+            querySnapshot.forEach((doc) => {
+              const data = doc.data()
+              // if(data.owner_uid != uid){
+                runs_array.push(data)
+                data["image"] = this.getImage()
+
+                // console.log(image)
+              // }
+              this.setState({runs_array:runs_array})
+
+            })
+      })
+    }
+
+    async getImage(){
+      const apiURL = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=CmRaAAAArWVstcJ3MaGyVm4wk7VUfq8SuTs1Nz01cJWTLbdKleUVTfq7vaQMOxmhWz5AAtMGDfpsKmBq9CsfllsnEEMzrDM5znoJQ1QnHVAbApy_J4P1C7ZLNmQxL706dvlcHE9CEhByc9IjGjbryrbwDCUnzSXsGhQEZWKvvMgjzKuCZZVAQacklhuorA&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA`
+                
+      const image = await fetch(apiURL);
+      return image
     }
 
     signOutUser = () => {
@@ -120,19 +169,20 @@ class HomeScreen extends React.Component {
                     horizontal={false} 
                     style={{paddingBottom:30}} 
                     showsHorizontalScrollIndicator={false}>
-                        {ScheduledRuns.map((order, index) => (
+                        {ScheduledRuns.map((run, index) => (
                           <TouchableOpacity 
                           key = {index}
                           onPress={()=>{
                             this.props.navigation.navigate("Order", {
-                                order: order
+                              run: run
                             })}} >
                           <Card 
-                          CartTitle= {order.cart_title}
-                          Image= {order.image}
-                          Progress={order.progress}
-                          Caption={order.order_title}
-                          Time={order.order_time} />
+                          CartTitle= {run.name}
+                          Image= {run.image}
+                          Progress={run.progress}
+                          Caption={run.name}
+                          // Time={Moment(run.scheduled_time).format('hh:mm, DD MMM YYYY')}
+                          />
                           </TouchableOpacity>
                           ))}  
                     </ScrollView>
@@ -215,7 +265,7 @@ const TitleBar = styled.View`
 
 const ScheduledRuns = [
   {
-    cart_title: "GameStop Sacramento",
+    name: "GameStop Sacramento",
     image: require('../assets/background7.jpg'),
     progress: 'done',
     order_title: "GameStop",
@@ -224,7 +274,7 @@ const ScheduledRuns = [
     deliverer_image: require('../assets/avatar.jpg')
   },
   {
-    cart_title: "Walmart",
+    name: "Walmart",
     image: require('../assets/walmart.jpeg'),
     progress: 'done',
     order_title: "Going to Walmart",
@@ -233,7 +283,7 @@ const ScheduledRuns = [
     deliverer_image: require('../assets/avatar.jpg')
   },
   {
-    cart_title: "Asians Food Market",
+    name: "Asians Food Market",
     image: require('../assets/asian_food_market.jpg'),
     progress: 'alert',
     order_title: "Asian Food Market",
@@ -242,7 +292,7 @@ const ScheduledRuns = [
     deliverer_image: require('../assets/avatar.jpg')
   },
   {
-    cart_title: "Walmart",
+    name: "Walmart",
     image: require('../assets/background1.jpg'),
     progress: 'done',
     order_title: "Asian Food Markert",

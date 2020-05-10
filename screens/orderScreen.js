@@ -21,15 +21,15 @@ class OrderScreen extends React.Component {
     
     render(){
         const { navigation } = this.props;
-        const order = navigation.getParam("order");
+        const order = navigation.getParam("run");
         return (
             <Container>
                 <ScrollView>
                     <StatusBar hidden />
                     <Cover>
                         <Image source={order.image} />
-                        <Title>{order.cart_title}</Title>
-                        <Caption>{order.order_title}</Caption>
+                        <Title>{order.name}</Title>
+                        <Caption>{order.name}</Caption>
                     </Cover>
                     <TouchableOpacity
                     onPress={() => {
@@ -53,12 +53,54 @@ class OrderScreen extends React.Component {
                         <Subtitle>{order.deliverer}</Subtitle>
                     </Wrapper>
                     <Content>
+
+
+                        {AllRequests.map((request, index) => (
+                            <OrderContainer key={index}>
+                            <TouchableOpacity>
+                                <OrderTitle>{request.requestor_name}</OrderTitle>
+                                <OrderAddress>{request.requestor_address}</OrderAddress>
+                                <OrderItemContainer>
+                                        <OrderItem>Hello</OrderItem>
+                                </OrderItemContainer>
+                            </TouchableOpacity>
+                            <TouchableOpacity>
+                                <OrderButtonContainer>
+                                    <OrderButtonTitle>Accept</OrderButtonTitle>
+                                </OrderButtonContainer>
+                            </TouchableOpacity>
+
+                        </OrderContainer>
+                          ))}  
+
+
+
                         <OrderContainer>
-                            <OrderTitle>Edison Li</OrderTitle>
-                            <OrderButtonContainer>
-                                <OrderButtonTitle>Accept</OrderButtonTitle>
+                            <TouchableOpacity>
+                                <OrderTitle>Edison Li</OrderTitle>
+                                <OrderAddress>217 Bantry Ct, Sacramento, CA</OrderAddress>
+                                <OrderItemContainer>
+                                    <OrderItem>5x Eggs</OrderItem>
+                                    <OrderItem>1x Bread</OrderItem>
+                                    <OrderItem>2x Milk</OrderItem>
+                                </OrderItemContainer>
+                            </TouchableOpacity>
+                            <TouchableOpacity>
+                                <OrderButtonContainer>
+                                    <OrderButtonTitle>Accept</OrderButtonTitle>
+                                </OrderButtonContainer>
+                            </TouchableOpacity>
+
+                        </OrderContainer>
+
+                        <OrderContainer>
+                            <OrderTitle>Huzaifa Ahmad</OrderTitle>
+                            <OrderAddress>217 Bantry Ct, Sacramento, CA</OrderAddress>
+                            <OrderButtonContainer style={{backgroundColor: 'green'}}>
+                                <OrderButtonTitle style={{color: 'white'}}>On My Way</OrderButtonTitle>
                             </OrderButtonContainer>
                         </OrderContainer>
+
                     </Content>
                 </ScrollView>
 
@@ -76,6 +118,8 @@ const Container = styled.View`
 
 const Cover = styled.View`
     height: 305px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
+
 `;
 
 const Image = styled.Image`
@@ -144,17 +188,48 @@ const OrderContainer = styled.View `
     background: white;
     borderRadius: 15px;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    margin-bottom: 32px;
 `;
-
 
 const OrderTitle = styled.Text `
     color: black;
     font-weight: 600;
-    font-size: 20px;
+    font-size: 25px;
     padding-top: 20px;
-    padding-bottom: 20px;
     padding-right: 20px;
     padding-left: 20px;
+    font-family: "Avenir Next";
+`;
+const OrderAddress = styled.Text `
+    color: #C0C0C0;
+    font-weight: 500;
+    font-size: 15px;
+    padding-right: 20px;
+    padding-left: 20px;
+    font-family: "Avenir Next";
+`;
+
+const OrderItemContainer = styled.View`
+    padding-top: 20px;
+`;
+const OrderItem = styled.Text `
+    color: gray;
+    font-weight: 500;
+    font-size: 15px;
+    font-family: "Avenir Next";
+    padding-bottom: 5px;
+    padding-right: 32px;
+    padding-left: 32px;
+`;
+
+const OrderDescriptionItem = styled.Text `
+    color: #C0C0C0;
+    font-weight: 500;
+    font-size: 12px;
+    font-family: "Avenir Next";
+    padding-bottom: 5px;
+    padding-right: 32px;
+    padding-left: 32px;
 `;
 
 const OrderButtonContainer = styled.View `
@@ -163,6 +238,7 @@ const OrderButtonContainer = styled.View `
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
     padding-right: 32px;
     padding-left: 32px;
+    margin-top: 15px;
     justify-content: center;
     align-items: center;
 `
@@ -173,3 +249,23 @@ const OrderButtonTitle = styled.Text `
     padding-top: 15px;
     padding-bottom: 15px;
 `;
+
+
+
+
+const AllRequests = [
+    {
+        request_id:"",
+        request_status: "Pending",
+        requestor_name: "Huzaifa Ahmad",
+        requestor_id:"",
+        requestor_address: "217 Barley Ct, Roseville, CA 95747",
+        distance_from_home: "0.5 mil",
+        items: {
+            Eggs: 5,
+            Bread:1,
+            Milk:2
+        }
+
+    }
+]

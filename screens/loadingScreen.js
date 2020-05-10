@@ -9,7 +9,9 @@ export default class LoadingScreen extends React.Component{
         firebase.auth().onAuthStateChanged(user=>{
             var stack = "Auth"
             if (user){
-                if (user.phoneNumber){
+                if (user){
+                    // stack = this.checkUser(user.uid)
+                    // console.log(stack)
                     stack = "App"
                 }
                 else{
@@ -19,6 +21,27 @@ export default class LoadingScreen extends React.Component{
             this.props.navigation.navigate(stack)
         })
     }
+    checkUser(uid){
+        const apiURL = `https://afternoon-brook-22773.herokuapp.com/api/users/${uid}`;
+        fetch(apiURL, {
+            method: 'GET'
+        })
+        .then((response) => response.json())
+        .then((responseJson) => {
+            if(responseJson){
+                console.log(responseJson);
+                return "App"
+            }
+            else{
+                return "AddAddress"
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+            return "AddAddress"
+        });
+    }
+
     render(){
         return(
             <View style={styles.container}>

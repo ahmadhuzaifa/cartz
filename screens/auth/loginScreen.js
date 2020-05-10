@@ -21,7 +21,26 @@ export default class LoginScreen extends React.Component{
     }
     handleLogin = () => {
         const {email, password} = this.state
-        firebase.auth().signInWithEmailAndPassword(email, password).catch(error => this.setState({errorMessage: error.message}))
+        firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(() => {
+            const user = firebase.auth().currentUser
+            const user_id = user.uid
+
+            if (user.phoneNumber){
+                firebase.firestore().collection('users').doc(user_id).onSnapshot(querySnapshot => {
+                    if (querySnapshot.data()){
+                        this.props.navigation.navigate("App")
+                    }
+                    else{
+                        this.props.navigation.navigate("FinalAuthStack")
+                    }
+                })
+            }
+            else{
+                this.props.navigation.navigate("PhoneNumberAuth") 
+            }
+        })
+        .catch(error => this.setState({errorMessage: error.message}))
     }
 
     render(){

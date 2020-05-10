@@ -67,15 +67,7 @@ export default class LoginScreen extends React.Component{
                             value={this.state.name}
                             ></TextInput>
                         </View>   
-                        <View style={{marginTop:32}}>
-                            <Text style={styles.inputTitle}>Address</Text>
-                            <TextInput 
-                            style={styles.input} 
-                            autoCapitalize="none"
-                            onChangeText={ address => this.setState({address})}
-                            value={this.state.address}
-                            ></TextInput>
-                        </View>   
+
                         <View style={{marginTop:32}}>
                             <Text style={styles.inputTitle}>Email Address</Text>
                             <TextInput 

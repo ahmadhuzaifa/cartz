@@ -11,7 +11,7 @@ import LoadingScreen from "../screens/loadingScreen.js";
 import RegisterScreen from "../screens/auth/registerScreen";
 import LoginScreen from "../screens/auth/loginScreen";
 import PhoneNumberScreen from "../screens/auth/phoneNumberScreen";
-import AddAdress from "../screens/auth/addAddress"
+import AddAddress from "../screens/auth/addAddress"
 
 // THE APP TABBAR NAVIGATOR
 import TabNavigator from "./TabBar";
@@ -29,19 +29,23 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 
+const FinalAuthStack = createStackNavigator({
+    AddAddress: AddAddress
+})
+FinalAuthStack.navigationOptions =  {
+    headerShown:false
+}
 
 const AuthStack = createStackNavigator({
     Login: LoginScreen,
-    RegisterScreen: RegisterScreen
+    RegisterScreen: RegisterScreen,
+    FinalAuthStack: FinalAuthStack
 })
 
 const VerificationStack = createStackNavigator({
     PhoneNumberScreen: PhoneNumberScreen
 })
 
-const FinalAuthStack = createStackNavigator({
-    AddAdress: AddAdress
-})
 
 export default createAppContainer(
     createSwitchNavigator({

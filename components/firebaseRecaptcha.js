@@ -2,7 +2,7 @@ import React from "react"
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, useRef } from "react-native"
 import { Ionicons } from '@expo/vector-icons';
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
-
+import AddAdress from "../screens/auth/addAddress"
 import firebase from '@firebase/app';
 require('firebase/auth');
 
@@ -71,10 +71,8 @@ export default function VerifyRecaptcha(props) {
                     async () => {
                         confirmation.confirm(code).then(function (result) {
                             console.log(result)
-                            //NEED TO ADD CODE HERE
-                            changeErrorMessage("")                            
-
-
+                            props.navigation.navigate('App')
+                            changeErrorMessage("")
                         }).catch(function (error) {
                             changeErrorMessage(error.message)                            
                         });

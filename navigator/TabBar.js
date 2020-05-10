@@ -1,13 +1,17 @@
 import React from "react"
 import { createStackNavigator } from "react-navigation-stack";
 import { createBottomTabNavigator } from "react-navigation-tabs";
+
 import HomeScreen from "../screens/HomeScreen";
 import OrderScreen from "../screens/orderScreen"
-import OrdersScreen from "../screens/ordersScreen"
-
-import { Ionicons, FontAwesome5, Entypo } from "@expo/vector-icons"
+import OrdersScreen from "../screens/myOrdersScreen"
+import MyRuns from "../screens/myRuns"
+import Perks from "../screens/perks"
 import AddScheduledRun from "../screens/add_run/add_run";
 import AddScheduledRun2 from "../screens/add_run/add_run2";
+
+import { Ionicons, FontAwesome5, Entypo } from "@expo/vector-icons"
+import AddAddress from "../screens/auth/addAddress";
 
 const activeColor = "#503D9E";
 const inactiveColor = "#b8bece";
@@ -23,7 +27,8 @@ AddRun.navigationOptions =  {
 const HomeStack = createStackNavigator({
     Home: HomeScreen,
     Order: OrderScreen,
-    AddRun: AddRun
+    AddRun: AddRun,
+    AddAddress: AddAddress
 }, 
 {
     mode: "modal"
@@ -43,14 +48,12 @@ HomeStack.navigationOptions = ({ navigation }) => {
             name="ios-home"
             size={26}
             color={focused ? activeColor : inactiveColor}
-        />
-        )
+        />)
     }
 };
 
-
 const PerksStack = createStackNavigator({
-    Order: OrdersScreen
+    Perks: Perks
 });
 
 
@@ -81,13 +84,27 @@ OrderStack.navigationOptions = {
     )
 };
 
+const RunsStack = createStackNavigator({
+    Run: MyRuns
+});
+
+
+RunsStack.navigationOptions = {
+    tabBarLabel: "My Runs",
+    tabBarIcon: ({focused}) => (
+        <FontAwesome5
+        name="running" size={24}
+        color={focused ? activeColor : inactiveColor}/>
+    )
+};
 
 
 
 const TabNavigator = createBottomTabNavigator({
     HomeStack,
     PerksStack,
-    OrderStack
+    RunsStack,
+    OrderStack,
 },
 {
   tabBarOptions: {
@@ -95,8 +112,5 @@ const TabNavigator = createBottomTabNavigator({
     inactiveTintColor: inactiveColor
   }
 });
-
-
-
 
 export default TabNavigator;

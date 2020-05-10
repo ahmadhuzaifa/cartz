@@ -3,6 +3,9 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAr
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { AnimatedRegion } from 'react-native-maps';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import Moment from 'moment';
+import firebase from '@firebase/app';
+import '@firebase/firestore'
 
 require('firebase/auth');
 require('firebase/firestore');
@@ -11,12 +14,13 @@ export default class AddScheduledRun2 extends React.Component{
 
     state = { 
         target_location: null,
+        target_location_data: null,
         initialRegion: null,
         errorMessage: null,
-        scheduled_date: null,
-        max_orders: 0,
         isDatePickerVisible: false,
-        isTimePickerVisible: false
+        isTimePickerVisible: false,
+        scheduled_date: new Date().getDate(),
+        scheduled_time: new Date().getTime(),
     }
 
     static navigationOptions = {
@@ -24,8 +28,61 @@ export default class AddScheduledRun2 extends React.Component{
     }
 
     componentDidMount() {
+        const location = this.props.navigation.getParam("location");
+        this.setState({target_location: location})
+        
         this.getLocation()
         this.getAddress()
+    }
+    async handlePost(){
+        const user = firebase.auth().currentUser;
+        const user_id = user.uid
+        const target_location = this.state.target_location_data.result
+        const data = {
+            "destination": target_location,
+            "scheduled_time": "Wed, 26 Apr 2017 12:39:28 GMT",
+            "max_orders":this.state.max_orders,
+            "status": "active",
+            "id": user_id
+        }
+        try {
+            let response = await fetch(
+                `https://afternoon-brook-22773.herokuapp.com/api/users/${user_id}/pickup`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+            }).then((response) => {
+                response.text()
+                if(response.status == 200 ||response.status == 201 ||response.status == 400){
+                    this.props.navigation.dismiss()
+                }
+                else{
+                    this.setState({ errorMessage : "Your request couldn't be made"})
+                }})
+            }
+            catch (error) {
+                this.setState({ errorMessage: error.message })
+            } 
+
+
+        // firebase.firestore().collection('runs').doc().set({
+        //     "user_id": user_id,
+        //     "destination":target_location,
+        //     "max_orders": this.state.max_orders,
+        //     "scheduled_date": this.state.scheduled_date,
+        //     "scheduled_time": this.state.scheduled_time,
+        //     "status": "active"
+        // })
+        // .then(
+        //     this.props.navigation.dismiss()
+        // )
+        // .catch(error => this.setState({ errorMessage: error.message }))
+
+
     }
 
     async getLocation() {
@@ -48,11 +105,15 @@ export default class AddScheduledRun2 extends React.Component{
 
     async getAddress(){
         const location = this.props.navigation.getParam("location");
-        const apiURL = `https://maps.googleapis.com/maps/api/geocode/json?address=${location.description}&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA`
+        const apiURL = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${location.place_id}&=&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA`
+
+        // const apiURL = `https://maps.googleapis.com/maps/api/geocode/json?address=${location.description}&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA`
+
         try{
             const results = await fetch(apiURL);
             const json = await results.json()
-            const geometry = json.results[0].geometry.location
+            this.setState({target_location_data:json})
+            const geometry = json.result.geometry.location
             this.setState({target_lat:geometry.lat, target_lng: geometry.lng})
         }
         catch (err){
@@ -61,9 +122,31 @@ export default class AddScheduledRun2 extends React.Component{
         }
     }
 
+    async getYelpData (destination){
+        this.setState({destination:destination.location})
+        const apiURL = `https://api.yelp.com/v3/businesses/search?term=${destination.location}&latitude=${this.state.latitude}&longitude=${this.state.longitude}`
+        
+        try{
+            const results = await fetch(apiURL,
+                {
+                method: 'GET',
+                headers:{
+                    "Authorization": "Bearer PJ8kaMDHjv-m5q4ehoklRT5xjrpEgOpqLsyysAONWOvh_AqiUPhYnOay2ERbFxXhm1_O5paPPWSLHm3pNDCENHP-seNNXd2c_3SvwRJXU-dtimCddRymhLLBqiGmXnYx"
+                }
+            });
+            const json = await results.json()
+            console.log(json)
+            this.setState({business:json.businesses})
+        }
+        catch (err){
+            this.setState({errorMessage:error.message})
+        }
+
+    } 
+
     render(){
         const location = this.props.navigation.getParam("location");
- 
+
         const showDatePicker = () => {
             this.setState({isDatePickerVisible:true});
         };
@@ -134,8 +217,7 @@ export default class AddScheduledRun2 extends React.Component{
                             autoCapitalize="none"
                             onChangeText={ max_orders => this.setState({max_orders})}
                             value={this.state.max_orders}
-                            numeric value = {true}
-                            keyboardType={'numeric'}
+                            keyboardType='numeric'
                             ></TextInput>
                         </View>   
                         <View style={{marginTop:32}}>
@@ -152,16 +234,25 @@ export default class AddScheduledRun2 extends React.Component{
                                 onConfirm={handleTimeConfirm}
                                 onCancel={hideTimePicker}
                             />
-                            <View>
-                                <Button title={"time"} style={styles.dateTimePicker} onPress={showTimePicker} />
-                                <Button title={"date"} style={styles.dateTimePicker} onPress={showDatePicker} />
+                                <View style={{display:"row", flexDirection: "row", justifyContent: 'space-between'}}>
+                                    <TouchableOpacity style={styles.button1} onPress={showTimePicker}>
+                                        <Text style={styles.buttonText1}>
+                                        {Moment(this.state.scheduled_time).format('hh:mm')}
+                                        </Text>   
+                                    </TouchableOpacity>
 
-                            </View>
+                                    <TouchableOpacity style={styles.button1} onPress={showDatePicker}>
+                                        <Text style={styles.buttonText1}>
+                                            {Moment(this.state.scheduled_date).format('DD MMM, YYYY')} 
+                                        </Text>   
+                                    </TouchableOpacity>
+
+                                </View>
                   
                         </View>   
                     </View>
                     <View>
-                        <TouchableOpacity style={styles.button} onPress={this.handleSignup}>
+                        <TouchableOpacity style={styles.button} onPress={this.handlePost.bind(this)}>
                             <Text style={styles.buttonText}>Post!</Text>
                         </TouchableOpacity>
                     </View>
@@ -204,7 +295,8 @@ const styles = StyleSheet.create({
     container:{
         flex: 1,
         fontFamily: "Avenir Next",
-        backgroundColor:"white"
+        backgroundColor:"white",
+        height: 1000
     },
     mapView:{
         height:200
@@ -268,7 +360,24 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         color:"white",
-        marginBottom: 240
+        marginBottom: 300
+    },
+    button1:{
+        width: "45%",
+        borderColor: "#503D9E",
+        borderWidth: 1,
+        borderRadius: 4,
+        height: 52,
+        alignItems: "center",
+        justifyContent: "center",
+        color:"white",
+        marginTop: 10
+    },
+    buttonText1:{
+        color: "#503D9E",
+        fontWeight: "400",
+        fontFamily: "Avenir Next",
+        fontSize: 15
     },
     buttonText:{
         color: "white",

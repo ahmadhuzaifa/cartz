@@ -39,6 +39,8 @@ export default class AddScheduledRun extends React.Component{
     async onChangeDestination (destination){
         this.setState({destination:destination.location})
         const apiURL = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${destination.location}&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA&sessiontoken=1234567890&location=${this.state.latitude},${this.state.longitude}&radius=500`;
+        // const apiURL = `https://api.yelp.com/v3/autocomplete?text=${destination.location}&latitude=37.786882&longitude=-122.399972`
+
         try{
             const results = await fetch(apiURL);
             const json = await results.json()
