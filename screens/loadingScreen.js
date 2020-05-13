@@ -9,9 +9,7 @@ export default class LoadingScreen extends React.Component{
         firebase.auth().onAuthStateChanged(user=>{
             var stack = "Auth"
             if (user){
-                if (user){
-                    // stack = this.checkUser(user.uid)
-                    // console.log(stack)
+                if (user.phoneNumber != null){
                     stack = "App"
                 }
                 else{
@@ -45,7 +43,7 @@ export default class LoadingScreen extends React.Component{
     render(){
         return(
             <View style={styles.container}>
-                <Text>loading...</Text>
+                <Text>Loading...</Text>
                 <ActivityIndicator size="large" />
             </View>
         )

@@ -16,6 +16,8 @@ import AddAddress from "../screens/auth/addAddress";
 const activeColor = "#503D9E";
 const inactiveColor = "#b8bece";
 
+
+
 const AddRun = createStackNavigator({
     AddRun1: AddScheduledRun,
     AddRun2: AddScheduledRun2
@@ -23,6 +25,8 @@ const AddRun = createStackNavigator({
 AddRun.navigationOptions =  {
     headerShown:false
 }
+
+
 
 const HomeStack = createStackNavigator({
     Home: HomeScreen,
@@ -33,7 +37,6 @@ const HomeStack = createStackNavigator({
 {
     mode: "modal"
 });
-
 HomeStack.navigationOptions = ({ navigation }) => {
     var tabBarVisible = true;
     const routeName = navigation.state.routes[navigation.state.index].routeName;
@@ -52,11 +55,10 @@ HomeStack.navigationOptions = ({ navigation }) => {
     }
 };
 
+
 const PerksStack = createStackNavigator({
     Perks: Perks
 });
-
-
 PerksStack.navigationOptions = {
     tabBarLabel: "Perks",
     tabBarIcon: ({focused}) => (
@@ -68,11 +70,11 @@ PerksStack.navigationOptions = {
     )
 };
 
+
+
 const OrderStack = createStackNavigator({
     Order: OrdersScreen
 });
-
-
 OrderStack.navigationOptions = {
     tabBarLabel: "My Orders",
     tabBarIcon: ({focused}) => (
@@ -84,11 +86,16 @@ OrderStack.navigationOptions = {
     )
 };
 
+
+
 const RunsStack = createStackNavigator({
-    Run: MyRuns
+    Run: MyRuns,
+    RunsScreen: OrderScreen,
+    AddRun: AddRun,
+}, 
+{
+    mode: "modal"
 });
-
-
 RunsStack.navigationOptions = {
     tabBarLabel: "My Runs",
     tabBarIcon: ({focused}) => (

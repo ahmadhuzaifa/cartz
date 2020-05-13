@@ -1,84 +1,171 @@
 import React from 'react';
-import { ScrollView, SafeAreaView, TouchableOpacity, Animated, Easing, StatusBar } from 'react-native';
+import { ScrollView, SafeAreaView, TouchableOpacity, Animated, Easing, RefreshControl } from 'react-native';
 import styled from 'styled-components';
 import RunCard from '../components/runCard';
 
 import { Ionicons } from '@expo/vector-icons';
- 
+import firebase from '@firebase/app';
+
+require('firebase/auth');
 class MyRuns extends React.Component {
     static navigationOptions = {
         headerShown:false
     }
+
+    constructor(props) {
+      super(props);
+   
+      this.state = {
+        activeRuns: [],
+        passedRuns: [],
+        completedRuns: [],
+        refreshing: false
+      }
+    }
+
+    componentDidMount(){
+      this.getData()
+    }
+    _onRefresh = () => {
+      this.setState({refreshing: true});
+      this.getData().then(() => {
+        this.setState({refreshing: false});
+      });
+    }
+    get_date_diff(date){
+      const current_date = new Date()
+      const diff =  (new Date(date) - new Date())
+      const minutes = diff/60000
+      const hours = minutes/60
+      const days = hours/24
+      var date_string = ""
+
+      if(minutes <= 60){
+        date_string= "Leaving in " + Number(minutes.toFixed(0)) + " Minutes "
+      }
+      else if(hours <= 24){
+        date_string= "Leaving in " + Number(hours.toFixed(0)) + " hours "
+      }
+      
+      else{
+        date_string= "Leaving in " + Number(days.toFixed(0)) + " days "
+      }
+      return date_string
+    }
+    async getData(){
+      const uid = firebase.auth().currentUser.uid
+      const apiURL = `https://afternoon-brook-22773.herokuapp.com/api/users/${uid}/pickups`;
+      try{
+        const results = await fetch(apiURL);
+        const json = await results.json()
+        const active = json.filter(run => run.status.includes('active'))
+        const active_future = active.filter(run => new Date(run.scheduled_time) >= new Date())
+        const active_passed = active.filter(run => new Date(run.scheduled_time) <= new Date())
+
+        const completed = json.filter(run => run.status.includes('completed'))
+
+        this.setState({activeRuns:active_future})
+        this.setState({passedRuns:active_passed})
+        this.setState({completedRuns:completed})
+      }
+      catch (err){
+          this.setState({errorMessage:error.message})
+      }
+    }
     render(){
         return (
-                <Container>
-                    <SafeAreaView>
-                    <TitleBar>
-                        <Title>Your Runs</Title>
-                        <Ionicons 
-                        name="md-add" 
-                        size={30} 
-                        color="#503D9E"
-                        style={{ position: "absolute", right:20, top:5}} />
-                    </TitleBar>
-                    <ScrollView>
-                      <Subtitle>Active</Subtitle>
-                      <ScrollView 
-                        horizontal={false} 
-                        style={{paddingBottom:30}} 
-                        showsHorizontalScrollIndicator={false}>
-                            {ScheduledRuns.map((run, index) => (
-                            <TouchableOpacity 
-                            key = {index}
-                            onPress={()=>{
-                                this.props.navigation.navigate("Order", {
-                                run: run
-                                })}} >
-                            <RunCard 
-                            CartTitle= {run.name}
-                            Image= {run.image}
-                            Progress={run.progress}
-                            Caption={run.order_title}
-                            Time={run.scheduled_time}
-                            />
-                            </TouchableOpacity>
-                            ))}  
-                        </ScrollView>
-                        <Subtitle>Completed</Subtitle>
-                      <ScrollView 
-                        horizontal={false} 
-                        style={{paddingBottom:30}} 
-                        showsHorizontalScrollIndicator={false}>
-                            {ScheduledRuns.map((run, index) => (
-                            <TouchableOpacity 
-                            key = {index}
-                            onPress={()=>{
-                                this.props.navigation.navigate("Order", {
-                                run: run
-                                })}} >
-                            <RunCard 
-                            CartTitle= {run.name}
-                            Image= {run.image}
-                            Progress={run.progress}
-                            Caption={run.name}
-                            // Time={Moment(run.scheduled_time).format('hh:mm, DD MMM YYYY')}
-                            />
-                            </TouchableOpacity>
-                            ))}  
-                        </ScrollView>
-                      </ScrollView>
-                    </SafeAreaView>
-                </Container>
+          <Container>
+            <SafeAreaView>
+
+              <TitleBar>
+                <Title>Your Runs</Title>
+                <Ionicons 
+                name="md-add" 
+                size={30} 
+                color="#503D9E"
+                style={{ position: "absolute", right:20, top:5}} />
+              </TitleBar>
+
+              <ScrollView style={{height:"100%", paddingBottom: 200}}
+                refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this._onRefresh}
+                  />
+                }>
+                {this.state.errorMessage != null &&
+                  <Text>{this.state.errorMessag}</Text>
+                }
+                
+                <Subtitle>Active Runs</Subtitle>
+                {this.state.passedRuns.length  ==  0 &&
+                  <Text>No Active Runs</Text>
+                }
+                {this.state.activeRuns.map((run, index) => (
+                  <TouchableOpacity 
+                  key = {index}
+                  onPress={()=>{
+                    this.props.navigation.navigate("RunsScreen", {
+                      run: run
+                      })}} >
+                      <RunCard 
+                      CartTitle= {run.destination.name}
+                      Progress={run.status}
+                      Time={this.get_date_diff(run.scheduled_time)}
+                      Description={"$".repeat(run.destination.price_level)}
+                      Name={run.destination.formatted_address}
+
+                      />
+                  </TouchableOpacity>
+                  ))}  
+                  {this.state.passedRuns.length > 0 &&
+                    <Subtitle>Passed Runs</Subtitle>
+                  }
+                  {this.state.passedRuns.map((run, index) => (
+                  <TouchableOpacity 
+                  key = {index}
+                  onPress={()=>{
+                    this.props.navigation.navigate("RunsScreen", {
+                      run: run
+                      })}} >
+                        <RunCard 
+                        CartTitle= {run.destination.name}
+                        Progress={run.status}
+                        Time={run.scheduled_time}
+                        Name={run.destination.formatted_address}
+
+                        />
+                  </TouchableOpacity>
+                  ))} 
+                  {this.state.completedRuns.length > 0 &&
+                    <Subtitle>Completed Runs</Subtitle>
+                  }
+                  {this.state.completedRuns.map((run, index) => (
+                  <TouchableOpacity 
+                  key = {index}
+                  onPress={()=>{
+                      this.props.navigation.navigate("Order", {
+                      run: run
+                      })}} >
+                  <RunCard 
+                  CartTitle= {run.destination.name}
+                  Progress={run.status}
+                  Time={run.scheduled_time}
+                  />
+                  </TouchableOpacity>
+                  ))} 
+                </ScrollView>
+            </SafeAreaView>
+        </Container>
         )
     }
 }
 export default MyRuns
 
 const Container = styled.View`
-  flex: 1;
   background-color: white;
   overflow: hidden;
-
+  flex: 1;
 `; 
 const TitleBar = styled.View`
   width: 100%;
@@ -92,12 +179,21 @@ const Title = styled.Text`
   color: black;
   font-weight: 700; 
 `;
+const Text = styled.Text`
+  font-size: 15px;
+  color: gray;
+  font-weight: 500; 
+  text-align: center;
+  margin-top: 10px;
+`;
+
+
 const Subtitle = styled.Text`
   color: black;
   font-weight: 600;
   font-size: 20px;
   margin-left: 20px;
-  margin-top: 0px;
+  margin-top: 20px;
   font-family: "Avenir Next";
   padding-left: 10px;
 

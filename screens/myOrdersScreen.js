@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
  
 class OrdersScreen extends React.Component {
     static navigationOptions = {
-        header:null
+        headerShown:false
     }
     render(){
         return (

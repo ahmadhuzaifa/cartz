@@ -1,15 +1,17 @@
 import React from "react"
 import styled from "styled-components"
-import { Button, ScrollView } from "react-native";
+import { Button, ScrollView, View, ImageBackground, Text } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from "react-native";
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
- 
+import firebase from '@firebase/app';
+import Avatar from "../components/Avatar";
+require('firebase/auth');
+
 class OrderScreen extends React.Component {
     static navigationOptions = {
-        header:null
+        headerShown:false
     }
     componentDidMount() {
         StatusBar.setBarStyle("light-content", true);
@@ -18,18 +20,43 @@ class OrderScreen extends React.Component {
     componentWillUnmount() {
         StatusBar.setBarStyle("dark-content", true);
     }
+    get_date_diff(date){
+        const current_date = new Date()
+        const diff =  (new Date(date) - new Date())
+        const minutes = diff/60000
+        const hours = minutes/60
+        const days = hours/24
+        var date_string = ""
+  
+        if(minutes <= 60){
+          date_string= "Leaving in " + Number(minutes.toFixed(0)) + " Minutes "
+        }
+        else if(hours <= 24){
+          date_string= "Leaving in " + Number(hours.toFixed(0)) + " hours "
+        }
+        
+        else{
+          date_string= "Leaving in " + Number(days.toFixed(0)) + " days "
+        }
+        return date_string
+      }
     
     render(){
         const { navigation } = this.props;
-        const order = navigation.getParam("run");
+        const run = navigation.getParam("run");
         return (
             <Container>
                 <ScrollView>
                     <StatusBar hidden />
                     <Cover>
-                        <Image source={order.image} />
-                        <Title>{order.name}</Title>
-                        <Caption>{order.name}</Caption>
+                        <Image 
+                        source={{uri:`https://maps.googleapis.com/maps/api/place/photo?photoreference=${run.destination.photos[1].photo_reference}&sensor=false&maxheight=1600&maxwidth=1600&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA`}}/>
+                        
+                        <View style={{ flex: 1, position: 'absolute',bottom: 0, left: 0, right: 0,backgroundColor:"rgba(0,0,0,0.2)", height: "100%",  width: "100%"}}> 
+                        <View style={{ padding: 10, flexDirection: 'row', justifyContent: 'space-between' }}></View>
+                        </View>
+                        <Title>{run.destination.name}</Title>
+                        <Caption>{run.scheduled_time}</Caption>
                     </Cover>
                     <TouchableOpacity
                     onPress={() => {
@@ -49,58 +76,41 @@ class OrderScreen extends React.Component {
                         </CloseView>
                     </TouchableOpacity>
                     <Wrapper>
-                        <Logo source={order.deliverer_image} />
-                        <Subtitle>{order.deliverer}</Subtitle>
+                        <Subtitle>BY {run.user.fullName}</Subtitle>
                     </Wrapper>
+                    
                     <Content>
 
+                          <TouchableOpacity>
+                            <AvatarContainer style={{}}>
+                                <Avatar></Avatar>
+                                <Text>Huzaifa</Text>
+                            </AvatarContainer>
+                          </TouchableOpacity>
 
-                        {AllRequests.map((request, index) => (
+
+
+
+                        {/* DONT DELETE THISSSS !!!!!!*/}
+                        {/* {AllRequests.map(({requestor_name, requestor_address,description, items}, index) => (
                             <OrderContainer key={index}>
                             <TouchableOpacity>
-                                <OrderTitle>{request.requestor_name}</OrderTitle>
-                                <OrderAddress>{request.requestor_address}</OrderAddress>
+                                <OrderTitle>{requestor_name}</OrderTitle>
+                                <OrderAddress>{requestor_address}</OrderAddress>
                                 <OrderItemContainer>
-                                        <OrderItem>Hello</OrderItem>
+                                    {items.map((item, j) => <OrderItem key={j}>{item}</OrderItem>)}
                                 </OrderItemContainer>
+                                <OrderDescriptionContainer>
+                                    <OrderDescriptionItem>{description}</OrderDescriptionItem>
+                                </OrderDescriptionContainer>
                             </TouchableOpacity>
                             <TouchableOpacity>
                                 <OrderButtonContainer>
                                     <OrderButtonTitle>Accept</OrderButtonTitle>
                                 </OrderButtonContainer>
                             </TouchableOpacity>
-
                         </OrderContainer>
-                          ))}  
-
-
-
-                        <OrderContainer>
-                            <TouchableOpacity>
-                                <OrderTitle>Edison Li</OrderTitle>
-                                <OrderAddress>217 Bantry Ct, Sacramento, CA</OrderAddress>
-                                <OrderItemContainer>
-                                    <OrderItem>5x Eggs</OrderItem>
-                                    <OrderItem>1x Bread</OrderItem>
-                                    <OrderItem>2x Milk</OrderItem>
-                                </OrderItemContainer>
-                            </TouchableOpacity>
-                            <TouchableOpacity>
-                                <OrderButtonContainer>
-                                    <OrderButtonTitle>Accept</OrderButtonTitle>
-                                </OrderButtonContainer>
-                            </TouchableOpacity>
-
-                        </OrderContainer>
-
-                        <OrderContainer>
-                            <OrderTitle>Huzaifa Ahmad</OrderTitle>
-                            <OrderAddress>217 Bantry Ct, Sacramento, CA</OrderAddress>
-                            <OrderButtonContainer style={{backgroundColor: 'green'}}>
-                                <OrderButtonTitle style={{color: 'white'}}>On My Way</OrderButtonTitle>
-                            </OrderButtonContainer>
-                        </OrderContainer>
-
+                          ))}  */}
                     </Content>
                 </ScrollView>
 
@@ -119,7 +129,6 @@ const Container = styled.View`
 const Cover = styled.View`
     height: 305px;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
-
 `;
 
 const Image = styled.Image`
@@ -142,7 +151,7 @@ const Title = styled.Text`
 
 const Caption = styled.Text`
     color: white;
-    font-size: 17;
+    font-size: 17px;
     position: absolute;
     bottom: 20px;
     left: 20px;
@@ -176,7 +185,7 @@ const Subtitle = styled.Text`
     font-size: 15px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.8);
-    margin-left: 5px;
+    margin-left: 0px;
     text-transform: uppercase;
 `;
 const Content = styled.View `
@@ -201,7 +210,7 @@ const OrderTitle = styled.Text `
     font-family: "Avenir Next";
 `;
 const OrderAddress = styled.Text `
-    color: #C0C0C0;
+    color: #7a7a7a;
     font-weight: 500;
     font-size: 15px;
     padding-right: 20px;
@@ -209,27 +218,31 @@ const OrderAddress = styled.Text `
     font-family: "Avenir Next";
 `;
 
-const OrderItemContainer = styled.View`
-    padding-top: 20px;
+const OrderDescriptionContainer = styled.View`
+    padding-top: 5px;
+    padding-bottom: 10px;
+    padding-right: 25px;
+    padding-left: 25px;
 `;
-const OrderItem = styled.Text `
-    color: gray;
+const OrderDescriptionItem = styled.Text `
+    color: black;
     font-weight: 500;
     font-size: 15px;
     font-family: "Avenir Next";
-    padding-bottom: 5px;
+`;
+const OrderItemContainer = styled.View`
+    padding-top: 15px;
+    padding-bottom: 10px;
     padding-right: 32px;
     padding-left: 32px;
 `;
 
-const OrderDescriptionItem = styled.Text `
-    color: #C0C0C0;
-    font-weight: 500;
-    font-size: 12px;
-    font-family: "Avenir Next";
-    padding-bottom: 5px;
-    padding-right: 32px;
-    padding-left: 32px;
+const OrderItem = styled.Text `
+    color: #383838;
+    font-weight: 400;
+    font-size: 16px;
+    font-family: "Courier New";
+    text-transform: uppercase;
 `;
 
 const OrderButtonContainer = styled.View `
@@ -250,8 +263,10 @@ const OrderButtonTitle = styled.Text `
     padding-bottom: 15px;
 `;
 
-
-
+const AvatarContainer = styled.View`
+    height: 305px;
+    flex-direction: row;
+`;
 
 const AllRequests = [
     {
@@ -261,11 +276,12 @@ const AllRequests = [
         requestor_id:"",
         requestor_address: "217 Barley Ct, Roseville, CA 95747",
         distance_from_home: "0.5 mil",
-        items: {
-            Eggs: 5,
-            Bread:1,
-            Milk:2
-        }
+        items: [
+            "5 Eggs",
+            "1 Bread",
+            "2 Milk"
+        ],
+        description:"Hey! Can you bring me these items? I need them by tonight. I appreciate your help! :)"
 
     }
 ]

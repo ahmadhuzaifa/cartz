@@ -5,22 +5,21 @@ import MapView, { AnimatedRegion } from 'react-native-maps';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Moment from 'moment';
 import firebase from '@firebase/app';
-import '@firebase/firestore'
 
 require('firebase/auth');
-require('firebase/firestore');
 
 export default class AddScheduledRun2 extends React.Component{
 
     state = { 
-        target_location: null,
-        target_location_data: null,
+        target_location: [],
+        target_location_data: [],
         initialRegion: null,
         errorMessage: null,
+        max_orders: 0,
         isDatePickerVisible: false,
         isTimePickerVisible: false,
-        scheduled_date: new Date().getDate(),
-        scheduled_time: new Date().getTime(),
+        scheduled_date: new Date(),
+        scheduled_time: new Date()
     }
 
     static navigationOptions = {
@@ -30,7 +29,6 @@ export default class AddScheduledRun2 extends React.Component{
     componentDidMount() {
         const location = this.props.navigation.getParam("location");
         this.setState({target_location: location})
-        
         this.getLocation()
         this.getAddress()
     }
@@ -38,12 +36,15 @@ export default class AddScheduledRun2 extends React.Component{
         const user = firebase.auth().currentUser;
         const user_id = user.uid
         const target_location = this.state.target_location_data.result
+        const time = Moment(this.state.scheduled_date).format('ddd, DD MMM YYYY ')+ Moment(this.state.scheduled_time).format('hh:mm:ss Z')
+        console.log(this.state.scheduled_date)
         const data = {
             "destination": target_location,
-            "scheduled_time": "Wed, 26 Apr 2017 12:39:28 GMT",
+            "scheduled_time": this.state.scheduled_date,
             "max_orders":this.state.max_orders,
             "status": "active",
-            "id": user_id
+            "id": user_id,
+            "post_time": new Date()
         }
         try {
             let response = await fetch(
@@ -56,8 +57,8 @@ export default class AddScheduledRun2 extends React.Component{
                     },
                     body: JSON.stringify(data)
             }).then((response) => {
-                response.text()
                 if(response.status == 200 ||response.status == 201 ||response.status == 400){
+                    console.log(response.text)
                     this.props.navigation.dismiss()
                 }
                 else{
@@ -67,22 +68,6 @@ export default class AddScheduledRun2 extends React.Component{
             catch (error) {
                 this.setState({ errorMessage: error.message })
             } 
-
-
-        // firebase.firestore().collection('runs').doc().set({
-        //     "user_id": user_id,
-        //     "destination":target_location,
-        //     "max_orders": this.state.max_orders,
-        //     "scheduled_date": this.state.scheduled_date,
-        //     "scheduled_time": this.state.scheduled_time,
-        //     "status": "active"
-        // })
-        // .then(
-        //     this.props.navigation.dismiss()
-        // )
-        // .catch(error => this.setState({ errorMessage: error.message }))
-
-
     }
 
     async getLocation() {
@@ -172,9 +157,9 @@ export default class AddScheduledRun2 extends React.Component{
        
         const handleTimeConfirm = (time) => {
         this.setState({scheduled_time:time});
-
         hideTimePicker();
         };
+
         return(
             <View style={styles.container}>
                 <SafeAreaView style={{flex:1}}>
@@ -205,12 +190,36 @@ export default class AddScheduledRun2 extends React.Component{
                     </MapView>
                     <Text style={styles.locationTitle}>{location.structured_formatting.main_text}</Text>
                     <Text style={styles.locationSubtitle}>{location.description}</Text>
+                    {/* <View style={styles.openingView}>
+                        {this.state.target_location_data.result["opening_hours"]["weekday_text"].map((timing, index) => (
+                            <Text style={styles.openingText}>{timing}</Text>
+
+                        ))}
+                        <Text style={styles.openingText}>Monday: 10:45 AM – 10:00 PM</Text>
+                        <Text style={styles.openingText}>Monday: 10:45 AM – 10:00 PM</Text>
+                        <Text style={styles.openingText}>Monday: 10:45 AM – 10:00 PM</Text>
+                        <Text style={styles.openingText}>Monday: 10:45 AM – 10:00 PM</Text>
+                        <Text style={styles.openingText}>Monday: 10:45 AM – 10:00 PM</Text>
+                        <Text style={styles.openingText}>Monday: 10:45 AM – 10:00 PM</Text>
+
+                    </View> */}
+
 
                     <View style={styles.errorMessage}>
                         {this.state.errorMessage && <Text style={styles.error}>{this.state.errorMessage}</Text>}
                     </View>
                     <View style={styles.form}>
                         <View>
+                            <Text style={styles.inputTitle}>Add a description</Text>
+                            <TextInput 
+                            style={styles.input} 
+                            autoCapitalize="none"
+                            onChangeText={ description => this.setState({description})}
+                            value={this.state.description}
+                            placeholder={"I am going to starbucks and ..."}
+                            ></TextInput>
+                        </View>  
+                        <View style={{marginTop:25}}>
                             <Text style={styles.inputTitle}>Max Orders</Text>
                             <TextInput 
                             style={styles.input} 
@@ -227,12 +236,15 @@ export default class AddScheduledRun2 extends React.Component{
                                 isVisible={this.state.isDatePickerVisible}
                                 onConfirm={handleConfirm}
                                 onCancel={hideDatePicker}
+                                minimumDate={new Date()}
                             />
                             <DateTimePickerModal
                                 mode="time"
                                 isVisible={this.state.isTimePickerVisible}
                                 onConfirm={handleTimeConfirm}
                                 onCancel={hideTimePicker}
+                                minuteInterval={15}
+                                is24Hour={true}
                             />
                                 <View style={{display:"row", flexDirection: "row", justifyContent: 'space-between'}}>
                                     <TouchableOpacity style={styles.button1} onPress={showTimePicker}>
@@ -271,6 +283,13 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         zIndex:1 
+    },
+    openingView:{
+        marginRight:32,
+        marginLeft:32,
+        marginTop: 10
+    },openingText:{
+        color:"gray"  
     },
     closeButton:{
         backgroundColor: "#FCD460",

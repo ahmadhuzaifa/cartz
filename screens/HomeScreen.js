@@ -1,18 +1,22 @@
 import React from 'react';
-import { ScrollView, SafeAreaView, TouchableOpacity, Animated, Easing, StatusBar } from 'react-native';
+import { 
+  ScrollView, 
+  SafeAreaView, 
+  TouchableOpacity, 
+  Animated, 
+  Easing, 
+  StatusBar, 
+  RefreshControl } from 'react-native';
 import styled from 'styled-components';
-import Card from '../components/card';
 import { Ionicons } from '@expo/vector-icons';
-import Action from '../components/Action';
-import Menu from '../components/Menu';
+import Card from '../components/card';
+import RunCard from '../components/runCard';
 import { connect } from "react-redux"
 import Avatar from '../components/Avatar';
-import Moment from 'moment'
+import Action from '../components/Action';
+import Menu from '../components/Menu';
 import firebase from '@firebase/app';
 require('firebase/auth');
-require('firebase/firestore');
-
-
 
 function mapStateToProps(state){
     return { action: state.action }
@@ -27,26 +31,32 @@ function mapDispatchToProps(dispatch){
 }
 
 class HomeScreen extends React.Component {
+
     state = {
-        scale: new Animated.Value(1), 
-        opacity: new Animated.Value(1),
-        email: "",
-        displayName:"",
-        runs_array:[]
+      scale: new Animated.Value(1), 
+      opacity: new Animated.Value(1),
+      email: "",
+      displayName:"",
+      runs_array:[],
+      latitude: null,
+      longitude: null
     };
+
     static navigationOptions = {
       headerShown:false
     }
     componentDidUpdate(){
         this.toggleMenu()
     }
+
     componentDidMount(){
       const {email, displayName} = firebase.auth().currentUser
       this.setState({email, displayName});
       StatusBar.setBarStyle("dark-content", true)
-      this.getRuns()
+      this.setUpRuns()
       this.checkAddress()
     }
+
     async checkAddress(){
       const uid = firebase.auth().currentUser.uid
       const apiURL = `https://afternoon-brook-22773.herokuapp.com/api/users/${uid}`;
@@ -67,31 +77,61 @@ class HomeScreen extends React.Component {
       });
     }
 
-    getRuns() {
-      const runs_array = []
-      this.setState({runs_array:[]})
-
-      const uid = firebase.auth().currentUser.uid
-      firebase.firestore().collection("runs").onSnapshot(querySnapshot => {
-            querySnapshot.forEach((doc) => {
-              const data = doc.data()
-              // if(data.owner_uid != uid){
-                runs_array.push(data)
-                data["image"] = this.getImage()
-
-                // console.log(image)
-              // }
-              this.setState({runs_array:runs_array})
-
-            })
+    async setUpRuns(){
+      navigator.geolocation.getCurrentPosition(
+        position =>{
+          let region = {
+            latitude: parseFloat(position.coords.latitude),
+            longitude: parseFloat(position.coords.longitude),
+            latitudeDelta: 5,
+            longitudeDelta: 5
+        };
+        this.setState({location:region} , () => {
+          this.getRuns();
       })
+      },
+      error => alert(error.message),
+      {timeout:100});
     }
 
-    async getImage(){
-      const apiURL = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=CmRaAAAArWVstcJ3MaGyVm4wk7VUfq8SuTs1Nz01cJWTLbdKleUVTfq7vaQMOxmhWz5AAtMGDfpsKmBq9CsfllsnEEMzrDM5znoJQ1QnHVAbApy_J4P1C7ZLNmQxL706dvlcHE9CEhByc9IjGjbryrbwDCUnzSXsGhQEZWKvvMgjzKuCZZVAQacklhuorA&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA`
-                
-      const image = await fetch(apiURL);
-      return image
+    async getRuns(){ 
+      const uid = firebase.auth().currentUser.uid
+      const radius = 50
+      const apiURL = `https://afternoon-brook-22773.herokuapp.com/api/pickups?id=${uid}&lat=${this.state.location.latitude}&lng=${this.state.location.longitude}&radius=${radius}`;
+      try{
+        const results = await fetch(apiURL);
+        const json = await results.json()
+        this.setState({runs_array:json})
+      }
+      catch (err){
+        this.setState({errorMessage:err.message})
+      }
+    }
+
+    get_date_diff(date){
+      const current_date = new Date()
+      const diff =  (new Date(date) - new Date())
+      const minutes = diff/60000
+      const hours = minutes/60
+      const days = hours/24
+      var date_string = ""
+      if(minutes <= 60){
+        date_string= "Leaving in " + Number(minutes.toFixed(0)) + " Minutes "
+      }
+      else if(hours <= 24){
+        date_string= "Leaving in " + Number(hours.toFixed(0)) + " hours "
+      }
+      else{
+        date_string= "Leaving in " + Number(days.toFixed(0)) + " days "
+      }
+      return date_string
+    }
+
+    _onRefresh = () => {
+      this.setState({refreshing: true});
+      this.getRuns().then(() => {
+        this.setState({refreshing: false});
+      });
     }
 
     signOutUser = () => {
@@ -128,8 +168,14 @@ class HomeScreen extends React.Component {
                 <AnimatedContainer style={{ transform: [{scale: this.state.scale}],
                  opacity: this.state.opacity }}>
                 <SafeAreaView>
-                    <ScrollView style={{height:"100%"}}>
-                    <TitleBar>
+                    <ScrollView style={{height:"100%"}}
+                    refreshControl={
+                      <RefreshControl
+                        refreshing={this.state.refreshing}
+                        onRefresh={this._onRefresh}
+                        />
+                      }>
+                      <TitleBar>
                         <TouchableOpacity onPress={this.props.openMenu}  style={{position:'absolute', top:0, left:20}}>
                             <Avatar />
                         </TouchableOpacity>
@@ -152,10 +198,10 @@ class HomeScreen extends React.Component {
                         Image={require('../assets/leaving.png')}
                         Text="Leaving" />
                       </TouchableOpacity>    
-                      <TouchableOpacity>
+                      <TouchableOpacity onPress={()=>{this.props.navigation.navigate("AddRun")}}>
                         <Action 
                         Image={require('../assets/truck.png')}
-                        Text="Deliver" />
+                        Text="Schedule" />
                       </TouchableOpacity>    
                       <TouchableOpacity>
                         <Action 
@@ -164,24 +210,28 @@ class HomeScreen extends React.Component {
                       </TouchableOpacity>    
                     </ScrollView>
             
-                    <Subtitle>Scheduled Runs</Subtitle>
+                    <Subtitle>Scheduled Runs Near you</Subtitle>
+                    {this.state.runs_array.length ==  0 &&
+                    <Text>No Active Runs Near You</Text>
+                    }
                     <ScrollView 
                     horizontal={false} 
                     style={{paddingBottom:30}} 
                     showsHorizontalScrollIndicator={false}>
-                        {ScheduledRuns.map((run, index) => (
+                        {this.state.runs_array.map((run, index) => (
                           <TouchableOpacity 
                           key = {index}
                           onPress={()=>{
                             this.props.navigation.navigate("Order", {
                               run: run
                             })}} >
-                          <Card 
-                          CartTitle= {run.name}
-                          Image= {run.image}
-                          Progress={run.progress}
-                          Caption={run.name}
-                          // Time={Moment(run.scheduled_time).format('hh:mm, DD MMM YYYY')}
+                          <RunCard 
+                          CartTitle= {run.destination.name}
+                          Name={"By " + run.user.fullName}
+                          Time={this.get_date_diff(run.scheduled_time)}
+                          Description={"$".repeat(run.destination.price_level)}
+                          Address={run.destination.formatted_address}
+                          // Image={{uri:`https://maps.googleapis.com/maps/api/place/photo?photoreference=${run.destination.photos[2].photo_reference}&sensor=false&maxheight=1600&maxwidth=1600&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA`}}
                           />
                           </TouchableOpacity>
                           ))}  
@@ -246,6 +296,13 @@ const Title = styled.Text`
   font-weight: 500;  
   font-family: "Avenir Next";
 
+`;
+const Text = styled.Text`
+  font-size: 15px;
+  color: gray;
+  font-weight: 500; 
+  text-align: center;
+  margin-top: 20px;
 `;
 
 const Name = styled.Text`

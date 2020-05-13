@@ -10,12 +10,12 @@ const Card = props => (
     <Container>
         <Cover>
             <Image source={props.Image} />
-            <Title>{props.CartTitle}</Title>
+            {/* <Title>{props.CartTitle}</Title> */}
         </Cover>
         <Content>
             <Progress source={ProgressImages[props.Progress]}/>
             <Wrapper>
-                <Caption>{props.Caption}</Caption>
+                <Caption>{props.CartTitle}</Caption>
                 <Subtitle>{props.Time}</Subtitle>
             </Wrapper>
 
@@ -25,7 +25,6 @@ const Card = props => (
 export default Card;
 
 const Content = styled.View `
-    padding-left: 20px;
     flex-direction: row;
     align-items: center;
     height: 80px;
@@ -34,8 +33,8 @@ const Content = styled.View `
 const Caption = styled.Text `
     color: #3c4560
     font-size:20px;
-    font-weight: 600;
-    `;
+    font-weight: 700;
+`;
 
 const Subtitle = styled.Text `
     color: #b8bece
@@ -45,7 +44,7 @@ const Subtitle = styled.Text `
     margin-top: 5px;
     `;
 const Wrapper = styled.View `
-    margin-left:10px;`;
+    margin-left:0px;`;
 
 const Progress = styled.Image`
     width: 35px;
@@ -66,10 +65,13 @@ const Container = styled.View`
 
 
 const Cover = styled.View `
-    width:100%;
-    height: 120px;
+    width:30%;
+    height: 100px;
     border-top-left-radius: 14px;
     border-top-right-radius: 14px;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+    
     overflow: hidden;
     `;
 
@@ -77,6 +79,7 @@ const Image = styled.Image `
     width:100%;
     height: 200px;
     position: absolute;
+
     top: 0;
     left: 0;
 `;
