@@ -97,7 +97,7 @@ class MyRuns extends React.Component {
                   <Text>{this.state.errorMessag}</Text>
                 }
                 
-                <Subtitle>Active Runs</Subtitle>
+                <Subtitle>Open Cartz</Subtitle>
                 {this.state.passedRuns.length  ==  0 &&
                   <Text>No Active Runs</Text>
                 }
@@ -105,7 +105,7 @@ class MyRuns extends React.Component {
                   <TouchableOpacity 
                   key = {index}
                   onPress={()=>{
-                    this.props.navigation.navigate("RunsScreen", {
+                    this.props.navigation.navigate("RunScreen", {
                       run: run
                       })}} >
                       <RunCard 
@@ -119,7 +119,7 @@ class MyRuns extends React.Component {
                   </TouchableOpacity>
                   ))}  
                   {this.state.passedRuns.length > 0 &&
-                    <Subtitle>Passed Runs</Subtitle>
+                    <Subtitle>Closed Cartz</Subtitle>
                   }
                   {this.state.passedRuns.map((run, index) => (
                   <TouchableOpacity 

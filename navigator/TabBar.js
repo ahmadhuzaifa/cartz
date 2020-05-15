@@ -3,12 +3,13 @@ import { createStackNavigator } from "react-navigation-stack";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 
 import HomeScreen from "../screens/HomeScreen";
-import OrderScreen from "../screens/orderScreen"
+import RunScreen from "../screens/runScreen"
 import OrdersScreen from "../screens/myOrdersScreen"
 import MyRuns from "../screens/myRuns"
 import Perks from "../screens/perks"
 import AddScheduledRun from "../screens/add_run/add_run";
 import AddScheduledRun2 from "../screens/add_run/add_run2";
+import RequestScreen from "../screens/requestScreen";
 
 import { Ionicons, FontAwesome5, Entypo } from "@expo/vector-icons"
 import AddAddress from "../screens/auth/addAddress";
@@ -26,13 +27,20 @@ AddRun.navigationOptions =  {
     headerShown:false
 }
 
+const RunStack = createStackNavigator({
+    RunScreen: RunScreen,
+    RequestScreen: RequestScreen
+})
+RunStack.navigationOptions =  {
+    headerShown:false
+}
 
 
 const HomeStack = createStackNavigator({
     Home: HomeScreen,
-    Order: OrderScreen,
     AddRun: AddRun,
-    AddAddress: AddAddress
+    AddAddress: AddAddress, 
+    RunStack: RunStack
 }, 
 {
     mode: "modal"
@@ -40,7 +48,7 @@ const HomeStack = createStackNavigator({
 HomeStack.navigationOptions = ({ navigation }) => {
     var tabBarVisible = true;
     const routeName = navigation.state.routes[navigation.state.index].routeName;
-    if (routeName == "Order"  || routeName == "AddRun" )  {
+    if (routeName == "RunStack"  || routeName == "AddRun" )  {
         tabBarVisible = false;
     }
     return {
@@ -90,19 +98,27 @@ OrderStack.navigationOptions = {
 
 const RunsStack = createStackNavigator({
     Run: MyRuns,
-    RunsScreen: OrderScreen,
+    RunStack: RunStack,
     AddRun: AddRun,
 }, 
 {
     mode: "modal"
 });
-RunsStack.navigationOptions = {
+RunsStack.navigationOptions = ({ navigation }) => {
+    var tabBarVisible = true;
+    const routeName = navigation.state.routes[navigation.state.index].routeName;
+    if (routeName == "RunStack")  {
+        tabBarVisible = false;
+    }
+    return {
+    tabBarVisible,
     tabBarLabel: "My Runs",
     tabBarIcon: ({focused}) => (
         <FontAwesome5
         name="running" size={24}
         color={focused ? activeColor : inactiveColor}/>
     )
+    }
 };
 
 

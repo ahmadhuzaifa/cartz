@@ -15,7 +15,11 @@ import { connect } from "react-redux"
 import Avatar from '../components/Avatar';
 import Action from '../components/Action';
 import Menu from '../components/Menu';
+import FilterItem from '../components/Filter';
 import firebase from '@firebase/app';
+
+
+
 require('firebase/auth');
 
 function mapStateToProps(state){
@@ -96,7 +100,7 @@ class HomeScreen extends React.Component {
 
     async getRuns(){ 
       const uid = firebase.auth().currentUser.uid
-      const radius = 50
+      const radius = 5
       const apiURL = `https://afternoon-brook-22773.herokuapp.com/api/pickups?id=${uid}&lat=${this.state.location.latitude}&lng=${this.state.location.longitude}&radius=${radius}`;
       try{
         const results = await fetch(apiURL);
@@ -209,10 +213,10 @@ class HomeScreen extends React.Component {
                         Text="Request" />
                       </TouchableOpacity>    
                     </ScrollView>
-            
-                    <Subtitle>Scheduled Runs Near you</Subtitle>
+
+                    <Subtitle style={{marginTop:5}}>Scheduled Cartz</Subtitle>
                     {this.state.runs_array.length ==  0 &&
-                    <Text>No Active Runs Near You</Text>
+                    <Text>No Active Cartz Near You</Text>
                     }
                     <ScrollView 
                     horizontal={false} 
@@ -222,7 +226,7 @@ class HomeScreen extends React.Component {
                           <TouchableOpacity 
                           key = {index}
                           onPress={()=>{
-                            this.props.navigation.navigate("Order", {
+                            this.props.navigation.navigate("RunScreen", {
                               run: run
                             })}} >
                           <RunCard 
