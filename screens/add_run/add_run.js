@@ -82,9 +82,9 @@ export default class AddScheduledRun extends React.Component{
                     </View>
                     <ScrollView keyboardDismissMode={true}>
                     <Text style={styles.greeting}>{`Where are \nyou going?`}</Text>
-                    <View style={styles.errorMessage}>
-                        {this.state.errorMessage && <Text style={styles.error}>{this.state.errorMessage}</Text>}
-                    </View>
+                    
+                        {this.state.errorMessage && <View style={styles.errorMessage}><Text style={styles.error}>{this.state.errorMessage}</Text></View>}
+                    
                     <View style={styles.form}>
                         <View>
                             <Text style={styles.inputTitle}>Location</Text>
@@ -93,7 +93,7 @@ export default class AddScheduledRun extends React.Component{
                             autoCapitalize="none"
                             onChangeText={ location => this.onChangeDestination({location})}
                             value={this.state.destination}
-                            placeholder={"Start typing..."}
+                            placeholder={"Starbucks/chipotle/walmart"}
                             ></TextInput>
                         </View>   
                         {predictions}
@@ -164,10 +164,13 @@ const styles = StyleSheet.create({
         color:"red",
         fontSize: 13,
         fontWeight: "600",
-        textAlign: "center"
+        textAlign: "center",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` })
+
     },
     form:{
         marginBottom:46,
+        marginTop: 20,
         marginHorizontal: 30,
     },
     inputTitle:{
@@ -178,11 +181,11 @@ const styles = StyleSheet.create({
         fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` })
     },
     input:{
-        borderBottomColor: "#503D9E",
+        borderBottomColor: "#C0C0C0",
         borderBottomWidth: StyleSheet.hairlineWidth,
         fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
-        fontSize: 18,
-        fontWeight: "400",
+        fontSize: 17,
+        fontWeight: "500",
         color: "black",
         height: 60
     },

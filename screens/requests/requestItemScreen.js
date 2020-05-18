@@ -78,7 +78,7 @@ export default class RequestItemScreen extends React.Component{
                 barcodeID: this.state.barcodeData,
                 images: this.state.images,
                 price: this.state.price,
-                quantity: this.state.quantity
+                quantity: this.state.quantity || "1"
             };
     
             this.props.navigation.state.params.addRequestItemData(data);
@@ -119,12 +119,12 @@ export default class RequestItemScreen extends React.Component{
                                 {/* <Text style={styles.inputTitle}>Item name</Text> */}
                                 <View>
 
-                                    <View style={{display:"row", flexDirection: "row", alignItems: "center"}} >
+                                    <View style={{flexDirection: "row", alignItems: "center"}} >
                                         <TextInput 
                                         style={styles.input} 
                                         onChangeText={ itemName => this.setState({itemName: itemName})}
                                         value={this.state.itemName}
-                                        placeholder="Item Name"
+                                        placeholder="Item Name*"
                                         ></TextInput>
                                     </View>
                                     <TextInput 
@@ -132,11 +132,11 @@ export default class RequestItemScreen extends React.Component{
                                     style={styles.inputDesc} 
                                     onChangeText={ description => this.setState({description: description})}
                                     value={this.state.description}
-                                    placeholder="Add a note for the deliverer..."
+                                    placeholder="Add a note for the deliverer*"
                                     ></TextInput>
                                     {/* <Text style={styles.inputTitle}>If possible provide the barcode ID</Text> */}
 
-                                    <View style={{display:"row", flexDirection: "row", alignItems: "center"}}>
+                                    <View style={{flexDirection: "row", alignItems: "center"}}>
 
                                         <TextInput 
                                         multiline
@@ -197,15 +197,17 @@ export default class RequestItemScreen extends React.Component{
                                         style={styles.numericalInput} 
                                         onChangeText={ quantity => this.setState({quantity: quantity})}
                                         value={this.state.quantity}
+                                        keyboardType='numeric'
                                         placeholder="3"
                                     ></TextInput>
                                 </View>
                                 <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'center', marginBottom: 10}}>
-                                    <Text style={styles.numericalInputText}>Estimated Price ($):</Text>
+                                    <Text style={styles.numericalInputText}>Estimated Price* ($):</Text>
                                     <TextInput 
                                         style={styles.numericalInput} 
                                         onChangeText={ price => this.setState({price: price})}
                                         value={this.state.price}
+                                        keyboardType='numeric'
                                         placeholder="10"
                                     ></TextInput>
                                 </View>

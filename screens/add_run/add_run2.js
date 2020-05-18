@@ -18,7 +18,7 @@ export default class AddScheduledRun2 extends React.Component{
         target_location_data: [],
         initialRegion: null,
         errorMessage: null,
-        max_orders: 0,
+        max_orders: null,
         isDatePickerVisible: false,
         isTimePickerVisible: false,
         scheduled_date: new Date(),
@@ -43,8 +43,9 @@ export default class AddScheduledRun2 extends React.Component{
         console.log(this.state.scheduled_date)
         const data = {
             "destination": target_location,
+            "description": this.state.description,
             "scheduled_time": this.state.scheduled_date,
-            "max_orders":this.state.max_orders,
+            "max_orders": Number(this.state.max_orders) || 5,
             "status": "active",
             "id": user_id,
             "post_time": new Date()
@@ -87,7 +88,7 @@ export default class AddScheduledRun2 extends React.Component{
                 })
             },
             error => this.setState({errorMessage: error.message}),
-            {enableHighAccuracy:true, maximumAge: 2000, timeout:20000}
+            {maximumAge: 2000, timeout:20000}
         )    
     }
 
@@ -140,7 +141,7 @@ export default class AddScheduledRun2 extends React.Component{
         this.setState({scheduled_time:time});
         hideTimePicker();
         };
-
+       
         return(
             <View style={styles.container}>
                 <SafeAreaView style={{flex:1}}>
@@ -162,11 +163,14 @@ export default class AddScheduledRun2 extends React.Component{
                     <MapView 
                     style={styles.mapView}
                     showsUserLocation = {true}
+                    // customMapStyle={customMapStyle}
+
                     initialRegion={this.state.initialRegion}>
                         <MapView.Marker
                             coordinate={{latitude: this.state.target_lat, longitude: this.state.target_lng}}
                             title={location.structured_formatting.main_text}
                             description={location.description}
+                            pinColor = {"#503D9E"}
                         />
                     </MapView>
                     <Text style={styles.locationTitle}>{location.structured_formatting.main_text}</Text>
@@ -209,7 +213,7 @@ export default class AddScheduledRun2 extends React.Component{
                             onChangeText={ max_orders => this.setState({max_orders})}
                             value={this.state.max_orders}
                             keyboardType='numeric'
-                            placeholder={"3"}
+                            placeholder={"5"}
                             ></TextInput>
                         </View>   
                         <View style={{marginTop:32}}>
@@ -229,7 +233,7 @@ export default class AddScheduledRun2 extends React.Component{
                                 minuteInterval={15}
                                 is24Hour={true}
                             />
-                                <View style={{display:"row", flexDirection: "row", justifyContent: 'space-between'}}>
+                                <View style={{flexDirection: "row", justifyContent: 'space-between'}}>
                                     <TouchableOpacity style={styles.button1} onPress={showTimePicker}>
                                         <Text style={styles.buttonText1}>
                                         {Moment(this.state.scheduled_time).format('hh:mm')}
@@ -353,22 +357,24 @@ const styles = StyleSheet.create({
         fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` })
     },
     input:{
-        borderBottomColor: "#503D9E",
+        borderBottomColor: "#C0C0C0",
         borderBottomWidth: StyleSheet.hairlineWidth,
         fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontSize: 18,
         fontWeight: "400",
         color: "black",
-        height: 60
+        height: 50
     },
     inputDesc:{
-        borderBottomColor: "#503D9E",
+        borderBottomColor: "#C0C0C0",
         borderBottomWidth: StyleSheet.hairlineWidth,
         fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontSize: 16,
         fontWeight: "400",
         color: "black",
-        height: 60
+        minHeight: 50,
+        maxHeight: 100
+
     },
     button:{
         marginHorizontal: 30,

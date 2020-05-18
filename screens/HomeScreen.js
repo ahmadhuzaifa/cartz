@@ -91,11 +91,12 @@ class HomeScreen extends React.Component {
             longitudeDelta: 5
         };
         this.setState({location:region} , () => {
+          console.log(region)
           this.getRuns();
       })
       },
       error => alert(error.message),
-      {timeout:100});
+      {timeout:2000});
     }
 
     async getRuns(){ 

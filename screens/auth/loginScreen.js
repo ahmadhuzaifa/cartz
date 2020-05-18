@@ -113,14 +113,14 @@ const styles = StyleSheet.create({
        color: "#503D9E",
        fontWeight: "600",
        fontSize: 19,
-       fontFamily: "Avenir Next",
+       fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
        width:"100%",
         textAlign:"center",
         position:"absolute"
     },
     container:{
         flex: 1,
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         backgroundColor: "white"
     },
     greeting:{
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
         fontSize: 25,
         fontWeight: "600",
         textAlign: "left",
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         marginLeft:32
     },
     errorMessage:{
@@ -152,12 +152,12 @@ const styles = StyleSheet.create({
         fontSize: 10,
         textTransform: "uppercase",
         fontWeight: "bold",
-        fontFamily: "Avenir Next"
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
     },
     input:{
         borderBottomColor: "#503D9E",
         borderBottomWidth: StyleSheet.hairlineWidth,
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontSize: 18,
         fontWeight: "400",
         color: "black",
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     buttonText:{
         color: "white",
         fontWeight: "400",
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontSize: 15
     }
 })

@@ -76,8 +76,8 @@ export default class RequestScreen extends React.Component{
                                         <Text style={styles.addErrText}>No items added. Please add an item using the "+" sign</Text>
                                     )}
                                     {this.state.items.map((item, index) => (
-                                    <View key={index} style={{ borderBottomColor: 'gray',borderBottomWidth: StyleSheet.hairlineWidth, marginBottom: 10, paddingBottom: 15}}>
-                                        <View style={{display:"row", flexDirection: "row", alignItems: "center"}}>
+                                    <View key={index} style={{ borderBottomColor: '#C0C0C0',borderBottomWidth: StyleSheet.hairlineWidth, marginBottom: 10, paddingBottom: 15}}>
+                                        <View style={{flexDirection: "row", alignItems: "center"}}>
                                             <Text style={styles.input} >{item.itemName}</Text>
                                             <TouchableOpacity>
                                                 <Ionicons 
@@ -237,7 +237,9 @@ const styles = StyleSheet.create({
         color: "black",
         width: "100%",
         marginTop: 0,
-        color: "gray"
+        color: "gray",
+        maxHeight: 100,
+
     },
     button:{
         marginHorizontal: 30,

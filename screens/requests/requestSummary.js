@@ -2,7 +2,8 @@ import React from "react"
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaView, Dimensions } from "react-native"
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import firebase from '@firebase/app';
-
+import { TextInput } from "react-native-gesture-handler";
+import Moment from 'moment';
 
 require('firebase/auth');
 
@@ -31,7 +32,40 @@ export default class RequestSummary extends React.Component{
         const json = await results.json()
         this.setState({user: json})
     }
-  
+    async addRequest(){
+        const user = firebase.auth().currentUser;
+        const user_id = user.uid
+        const run = this.props.navigation.getParam("run");
+        const items = this.props.navigation.getParam("data");
+        const data = {
+            items: items,
+            runID: run.id,
+            user_id: user_id
+        }
+        console.log(JSON.stringify(data))
+        // try {
+        //     let response = await fetch(
+        //         `https://afternoon-brook-22773.herokuapp.com/api/users/${user_id}/pickup`,
+        //         {
+        //             method: "POST",
+        //             headers: {
+        //                 "Accept": "application/json",
+        //                 "Content-Type": "application/json"
+        //             },
+        //             body: JSON.stringify(data)
+        //     }).then((response) => {
+        //         if(response.status == 200 ||response.status == 201 ||response.status == 400){
+        //             this.props.navigation.dismiss()
+        //         }
+        //         else{
+        //             console.log(response.status)
+        //             this.setState({ errorMessage : "Your request couldn't be made"})
+        //         }})
+        //     }
+        //     catch (error) {
+        //         this.setState({ errorMessage: error.message })
+        //     } 
+    }
 
     render(){
         const run = this.props.navigation.getParam("run");
@@ -68,7 +102,7 @@ export default class RequestSummary extends React.Component{
                                 </TouchableOpacity>
                             </View>
                             <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'center'}}>
-                                <Text style={styles.timingText}>{run.scheduled_time}</Text>
+                                <Text style={styles.timingText}>{Moment(run.scheduled_time).format(`h:mma, Do MMM, YYYY`)}</Text>
                                 <TouchableOpacity
                                 onPress={()=>{
                                     this.props.navigation.navigate("AddAddress")
@@ -87,11 +121,11 @@ export default class RequestSummary extends React.Component{
                         <View style={styles.form}>
                             <View>
                                 {items.map((item, index) => (
-                                        <View key={index} style={{ borderBottomColor: 'gray',borderBottomWidth: StyleSheet.hairlineWidth, marginBottom: 10, paddingBottom: 15}}>
+                                        <View key={index} style={{ borderBottomColor: '#C0C0C0',borderBottomWidth: StyleSheet.hairlineWidth, marginBottom: 10, paddingBottom: 15}}>
                                             <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'center'}}>
                                             <Text style={styles.input}>{item.itemName}</Text>
                                             <Text style={styles.price}>
-                                                ${item.price}
+                                                ${item.price} x {item.quantity}
                                             </Text>
                                         </View>
                                         <Text style={styles.inputDesc}>
@@ -106,13 +140,29 @@ export default class RequestSummary extends React.Component{
                                         </View>
                                 ))}
                                 </View>
-                                <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'flex-end', marginBottom: 20, marginTop: 20}}>
-                                    <Text style={styles.totalTitle}>Total:</Text>
-                                            <Text style={styles.totalPriceTitle}>${items.reduce(function(prev, cur) {return Number(prev) + Number(cur.price);}, 0)}</Text>
+            
+                                <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'flex-start', marginBottom: 20, marginTop: 20}}>
+                                    <View>
+                                        <Text style={styles.totalTitle}>Total:</Text>
+                                        <Text style={styles.serviceFeeText}>10% service fee</Text>
+                                    </View>
+                                    <Text style={styles.totalPriceTitle}>${Number(items.reduce(function(prev, cur) {return Number(prev) + (Number(cur.price)*Number(cur.quantity));}, 0)*1.1).toFixed(2)}</Text>
                                 </View>
+                                <TextInput 
+                                style={styles.note} 
+                                onChangeText={ note => this.setState({note: note})}
+                                value={this.state.note}
+                                placeholder="Add a note.."
+                                multiline
+                                ></TextInput>
                             </View>
-                        <View>
-                            <TouchableOpacity style={styles.button}>
+                                
+                            <View>
+                            <TouchableOpacity 
+                            style={styles.button}
+                            onPress={() => {
+                                this.addRequest()
+                            }}>
                                 <Text style={styles.buttonText}>Submit</Text>
                             </TouchableOpacity>
                         </View>
@@ -130,7 +180,7 @@ const styles = StyleSheet.create({
         width: "100%",
         flexDirection: "row",
         alignItems: "center",
-        zIndex:1 
+        zIndex:1, 
     },
     closeButton:{
         backgroundColor: "#FCD460",
@@ -191,6 +241,13 @@ const styles = StyleSheet.create({
         color: "black",
         height: 30,
     },
+    note:{
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
+        fontSize: 15,
+        fontWeight: "300",
+        color: "black",
+        marginBottom: 20
+    },
     inputDesc:{
         fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontSize: 14,
@@ -198,13 +255,21 @@ const styles = StyleSheet.create({
         color: "black",
         width: "100%",
         marginTop: 0,
-        color: "gray"
+        color: "gray",
+        maxHeight: 100,
+
     },
     totalTitle:{
         fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontSize: 20,
         fontWeight: "500",
         color: "black",
+    },
+    serviceFeeText:{
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
+        fontSize: 12,
+        fontWeight: "500",
+        color: "gray",
     },
     totalPriceTitle:{
         fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
@@ -306,7 +371,7 @@ const styles = StyleSheet.create({
     addressText:{
         color: "white",
         fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
-        fontWeight: "400",
+        fontWeight: "500",
         fontSize: 14
     },
     timingText:{

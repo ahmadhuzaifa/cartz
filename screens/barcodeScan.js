@@ -46,25 +46,11 @@ export default class BarcodeScanView extends Component {
 
     Vibration.vibrate();
     this.setState({ scannedItem: { data, type } });
-
-    if (type.startsWith('org.gs1.EAN')) {
-      // Do something for EAN
       console.log(`EAN scanned: ${data}`);
       this.resetScanner();
       // this.props.navigation.navigate('requestItem', { ean: data });
       this.props.navigation.state.params.setBarcodeData(data, type);
       this.props.navigation.goBack()
-
-    } else if (type.startsWith('org.iso.QRCode')) {
-      // Do samething for QRCode
-      console.log(`QRCode scanned: ${data}`);
-      this.resetScanner();
-    } else {
-      this.renderAlert(
-        'This barcode is not supported.',
-        `${type} : ${data}`,
-      );
-    }
   }
 
   renderMessage() {
