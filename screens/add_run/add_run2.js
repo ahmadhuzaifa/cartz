@@ -2,7 +2,10 @@ import React from "react"
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Button } from "react-native"
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { AnimatedRegion } from 'react-native-maps';
+
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import OptionsMenu from "react-native-options-menu";
+
 import Moment from 'moment';
 import firebase from '@firebase/app';
 
@@ -58,10 +61,10 @@ export default class AddScheduledRun2 extends React.Component{
                     body: JSON.stringify(data)
             }).then((response) => {
                 if(response.status == 200 ||response.status == 201 ||response.status == 400){
-                    console.log(response.text)
                     this.props.navigation.dismiss()
                 }
                 else{
+                    console.log(response.status)
                     this.setState({ errorMessage : "Your request couldn't be made"})
                 }})
             }
@@ -106,28 +109,6 @@ export default class AddScheduledRun2 extends React.Component{
             this.setState({errorMessage:err.message})
         }
     }
-
-    async getYelpData (destination){
-        this.setState({destination:destination.location})
-        const apiURL = `https://api.yelp.com/v3/businesses/search?term=${destination.location}&latitude=${this.state.latitude}&longitude=${this.state.longitude}`
-        
-        try{
-            const results = await fetch(apiURL,
-                {
-                method: 'GET',
-                headers:{
-                    "Authorization": "Bearer PJ8kaMDHjv-m5q4ehoklRT5xjrpEgOpqLsyysAONWOvh_AqiUPhYnOay2ERbFxXhm1_O5paPPWSLHm3pNDCENHP-seNNXd2c_3SvwRJXU-dtimCddRymhLLBqiGmXnYx"
-                }
-            });
-            const json = await results.json()
-            console.log(json)
-            this.setState({business:json.businesses})
-        }
-        catch (err){
-            this.setState({errorMessage:error.message})
-        }
-
-    } 
 
     render(){
         const location = this.props.navigation.getParam("location");
@@ -212,10 +193,11 @@ export default class AddScheduledRun2 extends React.Component{
                         <View>
                             <Text style={styles.inputTitle}>Add a description</Text>
                             <TextInput 
-                            style={styles.input} 
+                            style={styles.inputDesc} 
                             autoCapitalize="none"
                             onChangeText={ description => this.setState({description})}
                             value={this.state.description}
+                            multiline
                             placeholder={"I am going to starbucks and ..."}
                             ></TextInput>
                         </View>  
@@ -227,6 +209,7 @@ export default class AddScheduledRun2 extends React.Component{
                             onChangeText={ max_orders => this.setState({max_orders})}
                             value={this.state.max_orders}
                             keyboardType='numeric'
+                            placeholder={"3"}
                             ></TextInput>
                         </View>   
                         <View style={{marginTop:32}}>
@@ -260,13 +243,20 @@ export default class AddScheduledRun2 extends React.Component{
                                     </TouchableOpacity>
 
                                 </View>
-                  
+                                {/* <OptionsMenu
+                                button={require("../../assets/placeholder-add.jpg")}
+                                buttonStyle={{ width: 32, height: 20, margin: 7.5, resizeMode: "contain" }}
+                                destructiveIndex={1}
+                                options={["Private", "Public", "Cancel"]}
+                                /> */}
+                                {/* // actions={[this.setState({privacy:"private"}), this.setState({privacy:"public"})]}/> */}
                         </View>   
                     </View>
                     <View>
                         <TouchableOpacity style={styles.button} onPress={this.handlePost.bind(this)}>
-                            <Text style={styles.buttonText}>Post!</Text>
+                            <Text style={styles.buttonText}>Post</Text>
                         </TouchableOpacity>
+
                     </View>
                     </ScrollView>
                 </SafeAreaView>
@@ -306,14 +296,14 @@ const styles = StyleSheet.create({
         color: "#503D9E",
         fontWeight: "600",
         fontSize: 19,
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         width:"100%",
         textAlign:"center",
         position:"absolute"
     },
     container:{
         flex: 1,
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         backgroundColor:"white",
         height: 1000
     },
@@ -328,11 +318,11 @@ const styles = StyleSheet.create({
         fontSize: 25,
         fontWeight: "600",
         textAlign: "left",
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         marginLeft:32
     },
     locationSubtitle:{
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontWeight: "500",
         fontSize: 15,
         marginLeft: 32,
@@ -360,13 +350,22 @@ const styles = StyleSheet.create({
         fontSize: 10,
         textTransform: "uppercase",
         fontWeight: "bold",
-        fontFamily: "Avenir Next"
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` })
     },
     input:{
         borderBottomColor: "#503D9E",
         borderBottomWidth: StyleSheet.hairlineWidth,
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontSize: 18,
+        fontWeight: "400",
+        color: "black",
+        height: 60
+    },
+    inputDesc:{
+        borderBottomColor: "#503D9E",
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
+        fontSize: 16,
         fontWeight: "400",
         color: "black",
         height: 60
@@ -395,13 +394,13 @@ const styles = StyleSheet.create({
     buttonText1:{
         color: "#503D9E",
         fontWeight: "400",
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontSize: 15
     },
     buttonText:{
         color: "white",
         fontWeight: "400",
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontSize: 15
     },
 

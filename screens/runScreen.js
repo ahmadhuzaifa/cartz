@@ -21,7 +21,6 @@ class RunScreen extends React.Component {
         StatusBar.setBarStyle("dark-content", true);
     }
     get_date_diff(date){
-        const current_date = new Date()
         const diff =  (new Date(date) - new Date())
         const minutes = diff/60000
         const hours = minutes/60
@@ -94,7 +93,7 @@ class RunScreen extends React.Component {
                             <Types>{run.destination.types.join(" - ").replace(/_/g, " ").toUpperCase()}</Types>
                             <ContactContainer>
                                 <TouchableOpacity
-                                onPress={()=>{Linking.openURL(`telprompt:${run.destination.formatted_phone_number}`)}}
+                                onPress={()=>{Linking.openURL(`${Platform.OS === 'ios' ? 'telprompt:' : 'tel:'}${run.destination.formatted_phone_number}`)}}
                                 >
                                     <ContactItem>
                                         <Ionicons 
@@ -152,7 +151,9 @@ class RunScreen extends React.Component {
                                     ))}
                                 </OpenTimingsView>
                                 <TouchableOpacity
-                                onPress={()=>{this.props.navigation.navigate("RequestScreen")}}>
+                                onPress={()=>{this.props.navigation.navigate("RequestScreen", {
+                                    run: run
+                                })}}>
                                     <RequestButton>
                                         <RequestButtonText>Request an item</RequestButtonText>
                                     </RequestButton>
@@ -231,7 +232,7 @@ const Title = styled.Text`
     position: absolute;
     top: 78px;
     left: 20px;
-    font-family: "Avenir Next";
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
     margin-right: 30px;
 `;
 
@@ -242,7 +243,8 @@ const Caption = styled.Text`
     bottom: 20px;
     left: 20px;
     max-width: 300px;
-    font-family: "Avenir Next"
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
+
 `;
 
 const CloseView = styled.View`
@@ -270,7 +272,8 @@ const Subtitle = styled.Text`
     color: rgba(255, 255, 255, 0.8);
     margin-left: 0px;
     text-transform: uppercase;
-    font-family: "Avenir Next"
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
+
 
 `;
 const Content = styled.View `
@@ -294,7 +297,8 @@ const OrderTitle = styled.Text `
     padding-top: 20px;
     padding-right: 20px;
     padding-left: 20px;
-    font-family: "Avenir Next";
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
+;
 `;
 const OrderAddress = styled.Text `
     color: #7a7a7a;
@@ -302,7 +306,8 @@ const OrderAddress = styled.Text `
     font-size: 15px;
     padding-right: 20px;
     padding-left: 20px;
-    font-family: "Avenir Next";
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
+;
 `;
 const OrderDescriptionContainer = styled.View`
     padding-top: 5px;
@@ -314,7 +319,8 @@ const OrderDescriptionItem = styled.Text `
     color: black;
     font-weight: 500;
     font-size: 15px;
-    font-family: "Avenir Next";
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
+;
 `;
 const OrderItemContainer = styled.View`
     padding-top: 15px;
@@ -326,7 +332,7 @@ const OrderItem = styled.Text `
     color: #383838;
     font-weight: 400;
     font-size: 16px;
-    font-family: "Courier New";
+    font-family: ${Platform.select({ ios: `Courier New`, android: `Roboto` })};
     text-transform: uppercase;
 `;
 const OrderButtonContainer = styled.View `
@@ -364,7 +370,8 @@ const AvatarText = styled.Text`
     font-weight: 600;
     color: black;
     padding-left: 10px;
-    font-family: "Avenir Next"
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
+
 
 `;
 const AvatarSubtitleText = styled.Text`
@@ -372,7 +379,8 @@ const AvatarSubtitleText = styled.Text`
     font-weight: 500;
     color: gray;
     padding-left: 10px;
-    font-family: "Avenir Next"
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
+
 
 `;
 const ContentTitle = styled.Text`
@@ -381,21 +389,24 @@ const ContentTitle = styled.Text`
     font-weight: 700;
     width: 100%;
     padding-top: 30px;
-    font-family: "Avenir Next"
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
+
 `;
 const ContentSubTitle = styled.Text`
     font-size: 14px;
     color: gray;
     font-weight: 600;
     width: 100%;
-    font-family: "Avenir Next"
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
+
 `;
 const Types = styled.Text`
     font-size: 12px;
     color: black;
     font-weight: 600;
     width: 100%;
-    font-family: "Avenir Next"
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
+
 `;
 
 const ContactContainer = styled.View `

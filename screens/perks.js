@@ -37,14 +37,13 @@ const Subtitle = styled.Text`
   margin-left: 20px;
   margin-top: 20px;
   text-transform: uppercase;
-  font-family: "Avenir Next";
+  font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};;
 `
 
 const Container = styled.View`
   flex: 1;
   background-color: white;
   overflow: hidden;
-
 `; 
 const TitleBar = styled.View`
   width: 100%;

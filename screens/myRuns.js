@@ -101,7 +101,9 @@ class MyRuns extends React.Component {
                 {this.state.passedRuns.length  ==  0 &&
                   <Text>No Active Runs</Text>
                 }
-                {this.state.activeRuns.map((run, index) => (
+                {this.state.activeRuns.sort(function(a,b){
+                          return new Date(a.scheduled_time) - new Date(b.scheduled_time) ;
+                  }).map((run, index) => (
                   <TouchableOpacity 
                   key = {index}
                   onPress={()=>{
@@ -119,13 +121,15 @@ class MyRuns extends React.Component {
                   </TouchableOpacity>
                   ))}  
                   {this.state.passedRuns.length > 0 &&
-                    <Subtitle>Closed Cartz</Subtitle>
+                    <Subtitle>Passed Cartz</Subtitle>
                   }
-                  {this.state.passedRuns.map((run, index) => (
+                  {this.state.passedRuns.sort(function(a,b){
+                          return new Date(b.scheduled_time) - new Date(a.scheduled_time);
+                  }).map((run, index) => (
                   <TouchableOpacity 
                   key = {index}
                   onPress={()=>{
-                    this.props.navigation.navigate("RunsScreen", {
+                    this.props.navigation.navigate("RunScreen", {
                       run: run
                       })}} >
                         <RunCard 
@@ -140,11 +144,13 @@ class MyRuns extends React.Component {
                   {this.state.completedRuns.length > 0 &&
                     <Subtitle>Completed Runs</Subtitle>
                   }
-                  {this.state.completedRuns.map((run, index) => (
+                  {this.state.completedRuns.sort(function(a,b){
+                          return new Date(a.scheduled_time) - new Date(b.scheduled_time) ;
+                  }).map((run, index) => (
                   <TouchableOpacity 
                   key = {index}
                   onPress={()=>{
-                      this.props.navigation.navigate("Order", {
+                      this.props.navigation.navigate("RunScreen", {
                       run: run
                       })}} >
                   <RunCard 
@@ -194,7 +200,7 @@ const Subtitle = styled.Text`
   font-size: 20px;
   margin-left: 20px;
   margin-top: 20px;
-  font-family: "Avenir Next";
+  font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};;
   padding-left: 10px;
 
 `

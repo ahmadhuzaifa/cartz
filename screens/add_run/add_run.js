@@ -93,6 +93,7 @@ export default class AddScheduledRun extends React.Component{
                             autoCapitalize="none"
                             onChangeText={ location => this.onChangeDestination({location})}
                             value={this.state.destination}
+                            placeholder={"Start typing..."}
                             ></TextInput>
                         </View>   
                         {predictions}
@@ -133,14 +134,14 @@ const styles = StyleSheet.create({
        color: "#503D9E",
        fontWeight: "600",
        fontSize: 19,
-       fontFamily: "Avenir Next",
+       fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         width:"100%",
         textAlign:"center",
         position:"absolute"
     },
     container:{
         flex: 1,
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         backgroundColor:"white"
     },
     safeAreaContainer:{
@@ -150,7 +151,7 @@ const styles = StyleSheet.create({
         fontSize: 25,
         fontWeight: "600",
         textAlign: "left",
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         marginLeft:32
     },
     errorMessage:{
@@ -174,12 +175,12 @@ const styles = StyleSheet.create({
         fontSize: 10,
         textTransform: "uppercase",
         fontWeight: "bold",
-        fontFamily: "Avenir Next"
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` })
     },
     input:{
         borderBottomColor: "#503D9E",
         borderBottomWidth: StyleSheet.hairlineWidth,
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontSize: 18,
         fontWeight: "400",
         color: "black",
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
     buttonText:{
         color: "white",
         fontWeight: "400",
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontSize: 15
     },
     predictionView:{
@@ -206,13 +207,13 @@ const styles = StyleSheet.create({
         justifyContent:"center",
     },
     predictionText:{
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontWeight: "600",
         fontSize: 15,
         marginLeft: 35
     },
     predictionSubText:{
-        fontFamily: "Avenir Next",
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontWeight: "600",
         fontSize: 12,
         marginLeft: 35

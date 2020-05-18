@@ -9,7 +9,12 @@ import MyRuns from "../screens/myRuns"
 import Perks from "../screens/perks"
 import AddScheduledRun from "../screens/add_run/add_run";
 import AddScheduledRun2 from "../screens/add_run/add_run2";
-import RequestScreen from "../screens/requestScreen";
+import RequestScreen from "../screens/requests/requestScreen";
+import RequestItemScreen from "../screens/requests/requestItemScreen"
+import BarcodeScanView from "../screens/barcodeScan"
+import RequestSummary from "../screens/requests/requestSummary"
+
+
 
 import { Ionicons, FontAwesome5, Entypo } from "@expo/vector-icons"
 import AddAddress from "../screens/auth/addAddress";
@@ -29,7 +34,10 @@ AddRun.navigationOptions =  {
 
 const RunStack = createStackNavigator({
     RunScreen: RunScreen,
-    RequestScreen: RequestScreen
+    RequestScreen: RequestScreen,
+    RequestItemScreen:RequestItemScreen,
+    RequestSummary: RequestSummary,
+    BarcodeScanner: BarcodeScanView,
 })
 RunStack.navigationOptions =  {
     headerShown:false

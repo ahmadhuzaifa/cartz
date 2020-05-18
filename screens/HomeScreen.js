@@ -100,7 +100,7 @@ class HomeScreen extends React.Component {
 
     async getRuns(){ 
       const uid = firebase.auth().currentUser.uid
-      const radius = 5
+      const radius = 30
       const apiURL = `https://afternoon-brook-22773.herokuapp.com/api/pickups?id=${uid}&lat=${this.state.location.latitude}&lng=${this.state.location.longitude}&radius=${radius}`;
       try{
         const results = await fetch(apiURL);
@@ -222,7 +222,9 @@ class HomeScreen extends React.Component {
                     horizontal={false} 
                     style={{paddingBottom:30}} 
                     showsHorizontalScrollIndicator={false}>
-                        {this.state.runs_array.map((run, index) => (
+                        {this.state.runs_array.sort(function(a,b){
+                          return new Date(a.scheduled_time) - new Date(b.scheduled_time) ;
+                        }).map((run, index) => (
                           <TouchableOpacity 
                           key = {index}
                           onPress={()=>{
@@ -267,7 +269,7 @@ export default connect(
 const RootView = styled.View`
     background:black;
     flex: 1;
-    font-family: "Avenir Next";
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};;
 
 `
 
@@ -278,7 +280,7 @@ const Subtitle = styled.Text`
   margin-left: 20px;
   margin-top: 20px;
   text-transform: uppercase;
-  font-family: "Avenir Next";
+  font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};;
 
 `
 
@@ -298,7 +300,7 @@ const Title = styled.Text`
   font-size: 16px;
   color: #b8bece;
   font-weight: 500;  
-  font-family: "Avenir Next";
+  font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};;
 
 `;
 const Text = styled.Text`
