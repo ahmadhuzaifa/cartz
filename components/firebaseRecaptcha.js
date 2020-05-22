@@ -6,7 +6,7 @@ import AddAdress from "../screens/auth/addAddress"
 import firebase from '@firebase/app';
 require('firebase/auth');
 
-
+const domain = "https://afternoon-brook-22773.herokuapp.com"
 export default function VerifyRecaptcha(props) {
     const recaptchaVerifierRef = React.useRef(null);
     const [code, setCode] = React.useState("");
@@ -35,6 +35,9 @@ export default function VerifyRecaptcha(props) {
                     autoCapitalize="none" 
                     onChangeText={ phoneNumber => setPhoneNumber(phoneNumber)}
                     value={phoneNumber}
+                    placeholder={"+1916....."}
+                    keyboardType='numeric'
+
                     />
                 </View> 
                 <TouchableOpacity style={styles.button} onPress={
@@ -62,20 +65,52 @@ export default function VerifyRecaptcha(props) {
                 <View>
                     <Text style={styles.inputTitle}>Verification Code</Text>
                     <TextInput 
-                    style={styles.input} 
+                    style={styles.inputCode} 
                     autoCapitalize="none" 
                     onChangeText={ code => setCode(code)}
+                    placeholder={"000000"}
+                    keyboardType='numeric'
                     value={code}/>
                 </View>  
                 <TouchableOpacity style={styles.button} onPress={
                     async () => {
                         confirmation.confirm(code).then(function (result) {
-                            console.log(result)
-                            props.navigation.navigate('App')
-                            changeErrorMessage("")
+                            const user = firebase.auth().currentUser;
+                            const user_id = user.uid
+                            const data = {
+                                id: user_id,
+                                fullName: user.displayName,
+                                email:user.email,
+                                phoneNumber:user.phoneNumber
+                            }
+                            const apiURL = domain + "/api/users"
+                            console.log(apiURL)
+                            try {
+                                let response = fetch(
+                                    apiURL,
+                                    {
+                                        method: "POST",
+                                        headers: {
+                                        "Accept": "application/json",
+                                        "Content-Type": "application/json"
+                                    },
+                                    body: JSON.stringify(data)
+                                });
+                                if(response.status == 200 || response.status == 201){
+                                    changeErrorMessage("")
+                                    props.navigation.navigate('App')
+                                }
+                                else{
+                                    console.log(response.status)
+                                    changeErrorMessage("An error occurred")
+                                }
+                            }
+                            catch (error) {
+                                changeErrorMessage(error.message)
+                            }
                         }).catch(function (error) {
                             changeErrorMessage(error.message)                            
-                        });
+                        })
                     }}
                 >
                     <Text style={styles.buttonText}>Verify</Text>
@@ -163,6 +198,17 @@ const styles = StyleSheet.create({
         fontWeight: "400",
         color: "black",
         height: 60
+    },
+    inputCode:{
+        borderBottomColor: "#503D9E",
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        fontFamily: "Avenir Next",
+        fontSize: 24,
+        fontWeight: "500",
+        color: "black",
+        height: 60,
+        textAlign: "center",
+
     },
     button:{
         marginHorizontal: 30,

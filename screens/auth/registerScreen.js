@@ -59,7 +59,7 @@ export default class LoginScreen extends React.Component{
                     </View>
                     <View style={styles.form}>
                         <View>
-                            <Text style={styles.inputTitle}>Name</Text>
+                            <Text style={styles.inputTitle}>Full Name</Text>
                             <TextInput 
                             style={styles.input} 
                             autoCapitalize="none"

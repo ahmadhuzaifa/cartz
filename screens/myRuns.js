@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, SafeAreaView, TouchableOpacity, Animated, Easing, RefreshControl } from 'react-native';
+import { ScrollView, SafeAreaView, TouchableOpacity, View, Easing, RefreshControl, Button } from 'react-native';
 import styled from 'styled-components';
 import RunCard from '../components/runCard';
 
@@ -72,6 +72,7 @@ class MyRuns extends React.Component {
           this.setState({errorMessage:error.message})
       }
     }
+    
     render(){
         return (
           <Container>
@@ -79,11 +80,18 @@ class MyRuns extends React.Component {
 
               <TitleBar>
                 <Title>Your Runs</Title>
-                <Ionicons 
-                name="md-add" 
-                size={30} 
-                color="#503D9E"
-                style={{ position: "absolute", right:20, top:5}} />
+                <TouchableOpacity
+                onPress={()=>{
+                  this.props.navigation.navigate("AddRun")
+                }}
+                style={{ position: "absolute", right:20, top:5}} >
+                  <Ionicons 
+                  name="md-add" 
+                  size={30} 
+                  color="#503D9E"
+                />
+                </TouchableOpacity>
+
               </TitleBar>
 
               <ScrollView style={{height:"100%", paddingBottom: 200}}
@@ -98,7 +106,7 @@ class MyRuns extends React.Component {
                 }
                 
                 <Subtitle>Open Cartz</Subtitle>
-                {this.state.passedRuns.length  ==  0 &&
+                {this.state.activeRuns.length  ==  0 &&
                   <Text>No Active Runs</Text>
                 }
                 {this.state.activeRuns.sort(function(a,b){

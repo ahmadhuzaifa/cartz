@@ -21,8 +21,8 @@ export default class AddScheduledRun2 extends React.Component{
         max_orders: null,
         isDatePickerVisible: false,
         isTimePickerVisible: false,
-        scheduled_date: new Date(),
-        scheduled_time: new Date()
+        scheduled_date: null,
+        scheduled_time: null
     }
 
     static navigationOptions = {
@@ -39,17 +39,24 @@ export default class AddScheduledRun2 extends React.Component{
         const user = firebase.auth().currentUser;
         const user_id = user.uid
         const target_location = this.state.target_location_data.result
-        const time = Moment(this.state.scheduled_date).format('ddd, DD MMM YYYY ')+ Moment(this.state.scheduled_time).format('hh:mm:ss Z')
-        console.log(this.state.scheduled_date)
+        const date = this.state.scheduled_date
+        const time = this.state.scheduled_time
+        if(date == null || time == null){
+            this.setState({errorMessage:"Please set a time"})
+            return
+        }
+        const datetime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), time.getHours(), time.getMinutes(), time.getSeconds());
+
         const data = {
             "destination": target_location,
             "description": this.state.description,
-            "scheduled_time": this.state.scheduled_date,
-            "max_orders": Number(this.state.max_orders) || 5,
+            "scheduled_time": datetime,
+            "max_orders": Number(this.state.max_orders) || 10,
             "status": "active",
             "id": user_id,
             "post_time": new Date()
         }
+
         try {
             let response = await fetch(
                 `https://afternoon-brook-22773.herokuapp.com/api/users/${user_id}/pickup`,
@@ -156,7 +163,7 @@ export default class AddScheduledRun2 extends React.Component{
                                 size={15} 
                                 color="#546bfb"/>
                         </TouchableOpacity>
-                    <Text style={styles.topBarText}>Add Run</Text>
+                    <Text style={styles.topBarText}>Schedule Run</Text>
                     </View>
 
                     <ScrollView keyboardDismissMode={true}>
@@ -205,7 +212,7 @@ export default class AddScheduledRun2 extends React.Component{
                             placeholder={"I am going to starbucks and ..."}
                             ></TextInput>
                         </View>  
-                        <View style={{marginTop:25}}>
+                        {/* <View style={{marginTop:25}}>
                             <Text style={styles.inputTitle}>Max Orders</Text>
                             <TextInput 
                             style={styles.input} 
@@ -215,7 +222,7 @@ export default class AddScheduledRun2 extends React.Component{
                             keyboardType='numeric'
                             placeholder={"5"}
                             ></TextInput>
-                        </View>   
+                        </View>    */}
                         <View style={{marginTop:32}}>
                             <Text style={styles.inputTitle}>When are you going there?</Text>
                             <DateTimePickerModal
@@ -235,15 +242,29 @@ export default class AddScheduledRun2 extends React.Component{
                             />
                                 <View style={{flexDirection: "row", justifyContent: 'space-between'}}>
                                     <TouchableOpacity style={styles.button1} onPress={showTimePicker}>
-                                        <Text style={styles.buttonText1}>
-                                        {Moment(this.state.scheduled_time).format('hh:mm')}
-                                        </Text>   
+                                            {this.state.scheduled_time != null &&
+                                            <Text style={styles.buttonText1}>
+                                                {Moment(this.state.scheduled_time).format('hh:mm')}
+                                            </Text>   
+                                            }
+                                            {this.state.scheduled_time == null &&
+                                            <Text style={styles.buttonText1}>
+                                                Set Time
+                                            </Text>   
+                                            }
                                     </TouchableOpacity>
 
                                     <TouchableOpacity style={styles.button1} onPress={showDatePicker}>
+                                        {this.state.scheduled_date != null &&
                                         <Text style={styles.buttonText1}>
                                             {Moment(this.state.scheduled_date).format('DD MMM, YYYY')} 
                                         </Text>   
+                                            }
+                                            {this.state.scheduled_date == null &&
+                                            <Text style={styles.buttonText1}>
+                                                Set Date
+                                            </Text>   
+                                            }        
                                     </TouchableOpacity>
 
                                 </View>

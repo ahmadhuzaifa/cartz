@@ -5,6 +5,7 @@ import GooglePlacesInput from "../../components/googlePlacesSearch"
 import firebase from '@firebase/app';
 require('firebase/auth');
 require('firebase/firestore');
+const domain = "https://afternoon-brook-22773.herokuapp.com"
 
 export default class AddScheduledRun extends React.Component{
 
@@ -22,6 +23,7 @@ export default class AddScheduledRun extends React.Component{
     }
     componentDidMount(){
         this.getLocation()
+        this.checkAddress()
     }
     async getLocation() {
         navigator.geolocation.getCurrentPosition(
@@ -49,6 +51,32 @@ export default class AddScheduledRun extends React.Component{
         }
 
     }
+    async checkAddress(){
+        const uid = firebase.auth().currentUser.uid
+        const apiURL = domain + `/api/users/${uid}`;
+  
+        try {
+          let response = await fetch( apiURL)
+          const json = await response.json()
+          if(response.status == 200 ||response.status == 201 ||response.status == 400){
+            if(json.house_address != null){
+              this.props.navigation.navigate("App")
+            }
+            else{
+              this.props.navigation.navigate("AddAddress")
+            }
+          }
+          else{
+            this.props.navigation.navigate("Auth")
+          }
+        }
+        catch (error) {
+            this.setState({ errorMessage: error.message })
+            console.log(error)
+  
+        }
+      }
+  
 
     render(){
         

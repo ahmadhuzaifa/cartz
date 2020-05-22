@@ -13,6 +13,8 @@ export default class RequestScreen extends React.Component{
     componentDidMount(){
         const run = this.props.navigation.getParam("run")
         this.setState({run: run})
+        StatusBar.setBarStyle("dark-content", true);
+
     }
 
     static navigationOptions = {
@@ -50,6 +52,7 @@ export default class RequestScreen extends React.Component{
 
         return(
             <View style={styles.container}>
+                                <StatusBar hidden={false} />
                 <SafeAreaView style={{flex:1}}>
                     <View style={styles.topBar} >
                         <TouchableOpacity 

@@ -1,5 +1,5 @@
 import React from "react"
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, StatusBar, SafeAreaView} from "react-native"
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, StatusBar, SafeAreaView, ActivityIndicator} from "react-native"
 
 import firebase from '@firebase/app';
 require('firebase/auth');
@@ -13,20 +13,23 @@ export default class LoginScreen extends React.Component{
     state = { 
         email: "",
         password:"",
-        errorMessage:null
+        errorMessage:null,
+        isLoading: false
     }
     componentDidMount(){
         StatusBar.setBarStyle("dark-content", true)
 
     }
     handleLogin = () => {
+        this.setState({ isLoading: true }); 
         const {email, password} = this.state
         firebase.auth().signInWithEmailAndPassword(email, password)
         .then(() => {
+            this.setState({ isLoading: false }); 
             const user = firebase.auth().currentUser
             const user_id = user.uid
         })
-        .catch(error => this.setState({errorMessage: error.message}))
+        .catch(error => this.setState({errorMessage: error.message, isLoading: false}))
     }
 
     render(){
@@ -53,6 +56,11 @@ export default class LoginScreen extends React.Component{
                             value={this.state.email}
                             />
                         </View>
+                        {this.state.isLoading &&
+                                <View style={{flex : 1, justifyContent: 'center', alignItems: 'center',}}>
+                                    <ActivityIndicator style={{position:"absolute"}} color={"black"} />
+                                </View>
+                        }
                         <View style={{marginTop:32}}>
                             <Text style={styles.inputTitle}>Password</Text>
                             <TextInput 

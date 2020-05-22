@@ -24,6 +24,23 @@
     "ios": {
       "supportsTablet": true
     },
-    "description": ""
+    "android": {
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "cartz"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "description": "",
+    "scheme": "cartz"
   }
 }

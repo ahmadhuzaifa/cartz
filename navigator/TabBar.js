@@ -13,7 +13,7 @@ import RequestScreen from "../screens/requests/requestScreen";
 import RequestItemScreen from "../screens/requests/requestItemScreen"
 import BarcodeScanView from "../screens/barcodeScan"
 import RequestSummary from "../screens/requests/requestSummary"
-
+import OrderDetailScreen from "../screens/orderDetailScreen"
 
 
 import { Ionicons, FontAwesome5, Entypo } from "@expo/vector-icons"
@@ -38,6 +38,7 @@ const RunStack = createStackNavigator({
     RequestItemScreen:RequestItemScreen,
     RequestSummary: RequestSummary,
     BarcodeScanner: BarcodeScanView,
+    OrderDetailScreen: OrderDetailScreen
 })
 RunStack.navigationOptions =  {
     headerShown:false

@@ -58,7 +58,6 @@ export default class RequestItemScreen extends React.Component{
                 };
             });
         }
-        console.log(result);
     } catch (E) {
         console.log(E);
     }};
@@ -369,7 +368,9 @@ const styles = StyleSheet.create({
     image:{
         height:"100%",
         width:"100%",
-        position:'absolute'
+        position:'absolute',
+        borderRadius: 30,
+
     },
     imageContainer:{
         borderRadius: 30,
@@ -377,15 +378,14 @@ const styles = StyleSheet.create({
         width:150,
         marginRight: 10,
         backgroundColor: "white",
-        overflow: "hidden",
-
+        // overflow: hidden,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
-            height: 1,
+            height: 2,
         },
         shadowOpacity: 0.22,
-        shadowRadius: 2.22,
+        shadowRadius: 2.52,
         
         elevation: 3,
     },

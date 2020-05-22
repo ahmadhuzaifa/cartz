@@ -1,20 +1,38 @@
 import React from "react"
 import styled from "styled-components"
-import { ScrollView, View, Text } from "react-native";
-import { TouchableOpacity } from "react-native";
-import { Ionicons, FontAwesome5, Entypo } from '@expo/vector-icons';
-import { StatusBar, Linking } from "react-native";
+import { 
+    ScrollView, 
+    View, 
+    Text, 
+    StatusBar,
+    TouchableOpacity,
+    NavigationContainer 
+} from "react-native";
+import { 
+    Ionicons, 
+    FontAwesome5, 
+    Entypo 
+} from '@expo/vector-icons';
+import { Linking } from 'expo';
+import Avatar from "../components/Avatar";
+import Moment from 'moment';
 
 import firebase from '@firebase/app';
-import Avatar from "../components/Avatar";
 require('firebase/auth');
 
+
 class RunScreen extends React.Component {
+    
     static navigationOptions = {
         headerShown:false
     }
+    state={
+        requests:[],
+        response: []
+    }
     componentDidMount() {
         StatusBar.setBarStyle("light-content", true);
+        this.handleRequests()
     }
       
     componentWillUnmount() {
@@ -38,23 +56,58 @@ class RunScreen extends React.Component {
           date_string= "Leaving in " + Number(days.toFixed(0)) + " days "
         }
         return date_string
-      }
-    
+    }
+
+
+    async handleRequests(){
+        const run = this.props.navigation.getParam("run");
+        const user_id = firebase.auth().currentUser.uid
+        if(run.user.id == user_id){
+            const apiURL = `http://afternoon-brook-22773.herokuapp.com/api/pickup/${run.id}/orders`
+            try {
+                let response = await fetch( apiURL)
+                const json = await response.json()
+                this.setState({ requests: json })
+            }
+            catch (error) {
+                this.setState({ errorMessage: error.message })
+            } 
+        }
+        else{
+            const apiURL = `http://afternoon-brook-22773.herokuapp.com/api/pickup/${run.id}/orders?user_id=${user_id}`
+            try {
+                let response = await fetch( apiURL)
+                const json = await response.json()
+                this.setState({ response : json })
+            }
+            catch (error) {
+                this.setState({ errorMessage: error.message })
+            } 
+        }
+    }
     render(){
         const { navigation } = this.props;
         const run = navigation.getParam("run");
+        const prefix = Linking.makeUrl('/');
+        const linking = {
+            prefixes: [prefix],
+        };
         return (
-            <Container>
+            // <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
+            <Container linking={linking}>
                 <ScrollView>
                     <StatusBar hidden />
                     <Cover>
-                        <Image 
-                        source={{uri:`https://maps.googleapis.com/maps/api/place/photo?photoreference=${run.destination.photos[1].photo_reference}&sensor=false&maxheight=1600&maxwidth=1600&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA`}}/>
+                        {run.destination.photos != null &&
+                         <Image 
+                         source={{uri:`https://maps.googleapis.com/maps/api/place/photo?photoreference=${run.destination.photos[1].photo_reference}&sensor=false&maxheight=1600&maxwidth=1600&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA`}}/>
+                         
+                        }
                         <View style={{ flex: 1, position: 'absolute',bottom: 0, left: 0, right: 0,backgroundColor:"rgba(0,0,0,0.3)", height: "100%",  width: "100%"}}> 
                         <View style={{ padding: 10, flexDirection: 'row', justifyContent: 'space-between' }}></View>
                         </View>
                         <Title>{run.destination.name}</Title>
-                        <Caption>{run.scheduled_time}</Caption>
+                        <Caption>{Moment(run.scheduled_time).format("h:mm a, MMMM Do YYYY")}</Caption>
                     </Cover>
                     <TouchableOpacity
                     onPress={() => {
@@ -76,7 +129,6 @@ class RunScreen extends React.Component {
                     <Wrapper>
                         <Subtitle>BY {run.user.fullName}</Subtitle>
                     </Wrapper>
-                    
                     <Content>
                           <TouchableOpacity>
                             <AvatarContainer>
@@ -89,7 +141,6 @@ class RunScreen extends React.Component {
                           </TouchableOpacity>
                           <ContentTitle>{run.destination.name}</ContentTitle>
                           <ContentSubTitle>{run.destination.formatted_address}</ContentSubTitle>
-
                             <Types>{run.destination.types.join(" - ").replace(/_/g, " ").toUpperCase()}</Types>
                             <ContactContainer>
                                 <TouchableOpacity
@@ -104,9 +155,6 @@ class RunScreen extends React.Component {
                                         <ContactTitle>Call</ContactTitle>
                                     </ContactItem>
                                 </TouchableOpacity>
-
-
-
                                 <TouchableOpacity
                                 onPress={()=>{Linking.openURL(`${Platform.OS === 'ios' ? 'maps:' : 'geo:'}${run.destination.geometry.location.lat},${run.destination.geometry.location.long}?q=${run.destination.name}`)}}
                                 >
@@ -119,18 +167,7 @@ class RunScreen extends React.Component {
                                         <ContactTitle>View Map</ContactTitle>
                                     </ContactItem>
                                 </TouchableOpacity>
-
-                                {/* <ContactItem>
-                                    <Entypo 
-                                    name="message" 
-                                    size={35} 
-                                    color="#503D9E"
-                                    style={{ width: "100%", height: 40,textAlign:"center"}} />
-                                    <ContactTitle>Message</ContactTitle>
-                                </ContactItem> */}
-
                                 <TouchableOpacity>
-
                                     <ContactItem>
                                         <Entypo 
                                         name="share" 
@@ -141,44 +178,68 @@ class RunScreen extends React.Component {
                                     </ContactItem>
                                 </TouchableOpacity>
                             </ContactContainer>
-
                             {run.user_id != firebase.auth().currentUser.uid &&
                             <View>
-                                <Text style={{fontWeight:"bold"}}>Opening Hours</Text>
-                                <OpenTimingsView>
-                                    {run.destination.opening_hours.weekday_text.map((timing, index) => (
-                                        <OpeningText key={index}>{timing}</OpeningText>
-                                    ))}
-                                </OpenTimingsView>
-                                <TouchableOpacity
-                                onPress={()=>{this.props.navigation.navigate("RequestScreen", {
-                                    run: run
-                                })}}>
-                                    <RequestButton>
-                                        <RequestButtonText>Request an item</RequestButtonText>
-                                    </RequestButton>
-                                </TouchableOpacity>
+                                {run.destination.opening_hours != null &&
+                                <View>
+                                    <Text style={{fontWeight:"bold"}}>Opening Hours</Text>
+                                    <OpenTimingsView>
+                                        {run.destination.opening_hours.weekday_text.map((timing, index) => (
+                                            <OpeningText key={index}>{timing}</OpeningText>
+                                        ))}
+                                    </OpenTimingsView>
+                                </View>
+                                }
+                                 {this.state.response.length == 0 &&
+                                    <TouchableOpacity
+                                    onPress={()=>{this.props.navigation.navigate("RequestScreen", {
+                                        run: run
+                                    })}}>
+                                        <RequestButton>
+                                            <RequestButtonText>Request an item</RequestButtonText>
+                                        </RequestButton>
+                                    </TouchableOpacity>
+                                 }   
+                                 {this.state.response.length > 0 &&
+                                    <TouchableOpacity
+                                    onPress={()=>{this.props.navigation.navigate("OrderDetailScreen", {
+                                        order: this.state.response[0],
+                                        run: run
+                                    })}}>
+                                        <RequestButton>
+                                            <RequestButtonText>See Your Request</RequestButtonText>
+                                        </RequestButton>
+                                    </TouchableOpacity>
+                                 }                                 
                             </View>
                             }
                         {run.user_id == firebase.auth().currentUser.uid &&
                         <View>
-                            {AllRequests.map(({requestor_name, requestor_address,description, items}, index) => (
+                            {this.state.requests.map((order, index) => (
                             <OrderContainer key={index}>
                             <TouchableOpacity>
-                                <OrderTitle>{requestor_name}</OrderTitle>
-                                <OrderAddress>{requestor_address}</OrderAddress>
+                                <OrderTitle>{order.user.fullName}</OrderTitle>
+                                <OrderAddress>{order.user.house_address}</OrderAddress>
                                 <OrderItemContainer>
-                                    {items.map((item, j) => <OrderItem key={j}>{item}</OrderItem>)}
+                                    {order.requests[0].items.map((item, j) => <OrderItem key={j}>{item.quantity || 1} x {item.name}</OrderItem>)}
                                 </OrderItemContainer>
+                                {order.description != null &&
                                 <OrderDescriptionContainer>
-                                    <OrderDescriptionItem>{description}</OrderDescriptionItem>
+                                    <OrderDescriptionItem>{order.description}</OrderDescriptionItem>
                                 </OrderDescriptionContainer>
+                                }
+
                             </TouchableOpacity>
-                            <TouchableOpacity>
+                            <View>
+                            <TouchableOpacity
+                            onPress={()=>{
+                                this.props.navigation.navigate("OrderDetailScreen", {order: order, run: run})
+                            }}>
                                 <OrderButtonContainer>
-                                    <OrderButtonTitle>Accept</OrderButtonTitle>
+                                    <OrderButtonTitle>See Details</OrderButtonTitle>
                                 </OrderButtonContainer>
                             </TouchableOpacity>
+                            </View>
                         </OrderContainer>
                           ))} 
                             <TouchableOpacity>
@@ -186,17 +247,17 @@ class RunScreen extends React.Component {
                                     <RequestButtonText>Edit Run</RequestButtonText>
                                 </RequestButton>
                             </TouchableOpacity>
-                            <TouchableOpacity>
-                            <RequestButton style={{backgroundColor:"red", marginTop: 10}}>
-                                <RequestButtonText>Close Run</RequestButtonText>
-                            </RequestButton>
+
+                            <TouchableOpacity
+                            onPress={()=>{
+                                this.props.navigation.dismiss()
+                            }}>
+                                <RequestButton style={{backgroundColor:"red", marginTop: 10}}>
+                                    <RequestButtonText>Close Run</RequestButtonText>
+                                </RequestButton>
                             </TouchableOpacity>
                         </View>
-                    }
-
-
-                        {/* DONT DELETE THISSSS !!!!!!*/}
-                        
+                    }                        
                     </Content>
                 </ScrollView>
 

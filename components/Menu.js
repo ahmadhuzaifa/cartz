@@ -58,7 +58,6 @@ class Menu extends React.Component {
             <AnimatedContainer style={{ top: this.state.top }}>
                 <ScrollView>
                     <Cover>
-                        <Image source={require("../assets/background8.jpg")}></Image>
                         <Title>{firebase.auth().currentUser.displayName}</Title>
                         <Subtitle>{firebase.auth().currentUser.email}</Subtitle>
                     </Cover>
@@ -120,7 +119,7 @@ const AnimatedContainer = Animated.createAnimatedComponent(Container)
 
 const Cover = styled.View `
     height: 202px;
-    background: #503D9E;
+    background: #281678;
     justify-content: center;
     align-items: center;
 `;

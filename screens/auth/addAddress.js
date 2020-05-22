@@ -6,6 +6,9 @@ import '@firebase/firestore'
 require('firebase/auth');
 require("firebase/firestore");
 
+const domain = "https://afternoon-brook-22773.herokuapp.com"
+
+
 export default class AddAddress extends React.Component{
 
     state = { 
@@ -22,44 +25,31 @@ export default class AddAddress extends React.Component{
         const user = firebase.auth().currentUser;
         const user_id = user.uid
         const data = {
-            id: user_id,
-            fullName: user.displayName,
-            email:user.email,
             house_address:address
         }
+        console.log(user_id)
         try {
+            const apiURL = domain + `/api/users/${user_id}/address`
             let response = await fetch(
-             "https://afternoon-brook-22773.herokuapp.com/api/users",
-             {
-               method: "POST",
-               headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-               },
-              body: JSON.stringify(data)
+                apiURL,
+                {
+                    method: "PUT",
+                    headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+            if(response.status == 200 || response.status == 201){
+                this.props.navigation.goBack()
             }
-           );
-           if(response.status == 200 || response.status == 201 || response.status == 400){
-               this.props.navigation.goBack()
-           }
-           else{
-               this.setState({ errorMessage: "An error occurred" })
+            else{
+                this.setState({ errorMessage: "An error occurred" })
             }
-
-          }
-          catch (error) {
-              this.setState({ errorMessage: error.message })
+        }
+        catch (error) {
+            this.setState({ errorMessage: error.message })
         } 
-        // firebase.firestore().collection('users').doc(user_id).set({
-        //     name: user.displayName,
-        //     email: user.email,
-        //     photoUrl: user.photoURL,
-        //     address: address
-        // }).then(
-        //     this.props.navigation.navigate("App")
-        //     )
-        // .catch(error => this.setState({ errorMessage: error.message }))
-
     }
 
     async onChangeDestination (destination){
@@ -94,18 +84,14 @@ export default class AddAddress extends React.Component{
                         style={styles.closeButton}
                         onPress={() => {
                             this.props.navigation.goBack();
-                            // firebase.auth().signOut()
                         }}>
-                            {/* <Ionicons 
-                                name="ios-arrow-back" 
-                                size={20} 
-                                color="#546bfb"/> */}
-                                <Text>Skip</Text>
+                                <Text style={{color:"#503D9E", fontWeight:"600"}}>Later</Text>
                         </TouchableOpacity>
                         <Text style={styles.topBarText}>Address</Text>
                     </View>
                     <ScrollView keyboardDismissMode={true}>
                     <Text style={styles.greeting}>{`What's your \nAddress?`}</Text>
+
                     <View style={styles.errorMessage}>
                         {this.state.errorMessage && <Text style={styles.error}>{this.state.errorMessage}</Text>}
                     </View>
@@ -117,6 +103,7 @@ export default class AddAddress extends React.Component{
                             autoCapitalize="none"
                             onChangeText={ location => this.onChangeDestination({location})}
                             value={this.state.destination}
+                            placeholder={"Start typing..."}
                             ></TextInput>
                         </View>   
                         {predictions}
@@ -138,7 +125,7 @@ export default class AddAddress extends React.Component{
 
 const styles = StyleSheet.create({
     topBar:{
-        height:56,
+        height:70,
         width: "100%",
         flexDirection: "row",
         alignItems: "center",
@@ -146,13 +133,14 @@ const styles = StyleSheet.create({
     },
     closeButton:{
         backgroundColor: "#FCD460",
-        borderRadius: 30,
-        height: 46,
-        width:46,
-        left:20,
+        borderRadius: 20,
+        height: 55,
+        width:70,
+        right:20,
         zIndex: 1,
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        position:"absolute"
     },
     topBarText:{
        color: "#503D9E",
@@ -171,7 +159,6 @@ const styles = StyleSheet.create({
     safeAreaContainer:{
     },
     greeting:{
-        marginTop: 25,
         fontSize: 25,
         fontWeight: "600",
         textAlign: "left",
@@ -224,5 +211,20 @@ const styles = StyleSheet.create({
         fontWeight: "400",
         fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontSize: 15
-    }
+    },
+
+    predictionView:{
+        height:40,
+        justifyContent:"center",
+    },
+    predictionText:{
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
+        fontWeight: "600",
+        fontSize: 15,
+    },
+    predictionSubText:{
+        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
+        fontWeight: "600",
+        fontSize: 12,
+    },
 })

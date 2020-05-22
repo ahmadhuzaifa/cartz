@@ -33,6 +33,7 @@ function mapDispatchToProps(dispatch){
         })
     }
 }
+const domain = "https://afternoon-brook-22773.herokuapp.com"
 
 class HomeScreen extends React.Component {
 
@@ -63,22 +64,30 @@ class HomeScreen extends React.Component {
 
     async checkAddress(){
       const uid = firebase.auth().currentUser.uid
-      const apiURL = `https://afternoon-brook-22773.herokuapp.com/api/users/${uid}`;
-      fetch(apiURL, {
-          method: 'GET'
-      })
-      .then((response) => {
-        response.text()
+      const apiURL = domain + `/api/users/${uid}`;
+
+      try {
+        let response = await fetch( apiURL)
+        console.log(response.status)
+        const json = await response.json()
         if(response.status == 200 ||response.status == 201 ||response.status == 400){
-          this.props.navigation.navigate("App")
+          if(json.house_address != null){
+            this.props.navigation.navigate("App")
+
+          }
+          else{
+            this.props.navigation.navigate("AddAddress")
+          }
         }
         else{
-          this.props.navigation.navigate("AddAddress")
-        }})
-      .catch((error) => {
-          console.error(error);
-          return "AddAddress"
-      });
+          this.props.navigation.navigate("Auth")
+        }
+      }
+      catch (error) {
+          this.setState({ errorMessage: error.message })
+          console.log(error)
+
+      }
     }
 
     async setUpRuns(){
@@ -96,13 +105,13 @@ class HomeScreen extends React.Component {
       })
       },
       error => alert(error.message),
-      {timeout:2000});
+      );
     }
 
     async getRuns(){ 
       const uid = firebase.auth().currentUser.uid
       const radius = 30
-      const apiURL = `https://afternoon-brook-22773.herokuapp.com/api/pickups?id=${uid}&lat=${this.state.location.latitude}&lng=${this.state.location.longitude}&radius=${radius}`;
+      const apiURL = domain + `/api/pickups?id=${uid}&lat=${this.state.location.latitude}&lng=${this.state.location.longitude}&radius=${radius}`;
       try{
         const results = await fetch(apiURL);
         const json = await results.json()

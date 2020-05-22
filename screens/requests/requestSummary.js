@@ -14,7 +14,8 @@ export default class RequestSummary extends React.Component{
         errorMessage: null,
         items: [],
         itemsCount: 2,
-        user: {}
+        user: {},
+        note: ""
     }
 
     static navigationOptions = {
@@ -23,6 +24,7 @@ export default class RequestSummary extends React.Component{
 
     componentDidMount() {
         this.getAddress()
+
     }
 
     async getAddress(){
@@ -37,34 +39,36 @@ export default class RequestSummary extends React.Component{
         const user_id = user.uid
         const run = this.props.navigation.getParam("run");
         const items = this.props.navigation.getParam("data");
+        const apiURL = `http://afternoon-brook-22773.herokuapp.com/api/pickup/${run.id}/order`
+
+        console.log(run.id)
         const data = {
             items: items,
-            runID: run.id,
-            user_id: user_id
+            user_id: user_id,
+            note: this.state.note
         }
-        console.log(JSON.stringify(data))
-        // try {
-        //     let response = await fetch(
-        //         `https://afternoon-brook-22773.herokuapp.com/api/users/${user_id}/pickup`,
-        //         {
-        //             method: "POST",
-        //             headers: {
-        //                 "Accept": "application/json",
-        //                 "Content-Type": "application/json"
-        //             },
-        //             body: JSON.stringify(data)
-        //     }).then((response) => {
-        //         if(response.status == 200 ||response.status == 201 ||response.status == 400){
-        //             this.props.navigation.dismiss()
-        //         }
-        //         else{
-        //             console.log(response.status)
-        //             this.setState({ errorMessage : "Your request couldn't be made"})
-        //         }})
-        //     }
-        //     catch (error) {
-        //         this.setState({ errorMessage: error.message })
-        //     } 
+        try {
+            let response = await fetch( apiURL,
+                {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+            })
+                const status = response.status
+                const json = await response.json()
+                if(status == 200 ||status == 201){
+                    this.props.navigation.dismiss()
+                }
+                else{
+                    this.setState({ errorMessage: json.message})
+                }
+            }
+            catch (error) {
+                this.setState({ errorMessage: error.message })
+            } 
     }
 
     render(){
@@ -73,6 +77,7 @@ export default class RequestSummary extends React.Component{
 
         return(
             <View style={styles.container}>
+
                 <SafeAreaView style={{flex:1}}>
                     <View style={styles.topBar} >
                         <TouchableOpacity 
