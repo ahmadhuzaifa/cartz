@@ -2,9 +2,7 @@ import React from "react"
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Button } from "react-native"
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { AnimatedRegion } from 'react-native-maps';
-
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import OptionsMenu from "react-native-options-menu";
 
 import Moment from 'moment';
 import firebase from '@firebase/app';
@@ -22,7 +20,9 @@ export default class AddScheduledRun2 extends React.Component{
         isDatePickerVisible: false,
         isTimePickerVisible: false,
         scheduled_date: null,
-        scheduled_time: null
+        scheduled_time: null,
+        target_lat: 0,
+        target_lng: 0
     }
 
     static navigationOptions = {
@@ -70,6 +70,10 @@ export default class AddScheduledRun2 extends React.Component{
             }).then((response) => {
                 if(response.status == 200 ||response.status == 201 ||response.status == 400){
                     this.props.navigation.dismiss()
+                    // navigate("CartConfirmation",
+                    // {
+                    //     post: data
+                    // })
                 }
                 else{
                     console.log(response.status)
@@ -95,7 +99,7 @@ export default class AddScheduledRun2 extends React.Component{
                 })
             },
             error => this.setState({errorMessage: error.message}),
-            {maximumAge: 2000, timeout:20000}
+            // {maximumAge: 2000, timeout:20000}
         )    
     }
 
@@ -163,15 +167,13 @@ export default class AddScheduledRun2 extends React.Component{
                                 size={15} 
                                 color="#546bfb"/>
                         </TouchableOpacity>
-                    <Text style={styles.topBarText}>Schedule Run</Text>
+                    <Text style={styles.topBarText}>Schedule Cart</Text>
                     </View>
 
                     <ScrollView keyboardDismissMode={true}>
                     <MapView 
                     style={styles.mapView}
                     showsUserLocation = {true}
-                    // customMapStyle={customMapStyle}
-
                     initialRegion={this.state.initialRegion}>
                         <MapView.Marker
                             coordinate={{latitude: this.state.target_lat, longitude: this.state.target_lng}}
@@ -182,20 +184,7 @@ export default class AddScheduledRun2 extends React.Component{
                     </MapView>
                     <Text style={styles.locationTitle}>{location.structured_formatting.main_text}</Text>
                     <Text style={styles.locationSubtitle}>{location.description}</Text>
-                    {/* <View style={styles.openingView}>
-                        {this.state.target_location_data.result["opening_hours"]["weekday_text"].map((timing, index) => (
-                            <Text style={styles.openingText}>{timing}</Text>
-
-                        ))}
-                        <Text style={styles.openingText}>Monday: 10:45 AM – 10:00 PM</Text>
-                        <Text style={styles.openingText}>Monday: 10:45 AM – 10:00 PM</Text>
-                        <Text style={styles.openingText}>Monday: 10:45 AM – 10:00 PM</Text>
-                        <Text style={styles.openingText}>Monday: 10:45 AM – 10:00 PM</Text>
-                        <Text style={styles.openingText}>Monday: 10:45 AM – 10:00 PM</Text>
-                        <Text style={styles.openingText}>Monday: 10:45 AM – 10:00 PM</Text>
-
-                    </View> */}
-
+    
 
                     <View style={styles.errorMessage}>
                         {this.state.errorMessage && <Text style={styles.error}>{this.state.errorMessage}</Text>}
@@ -212,17 +201,7 @@ export default class AddScheduledRun2 extends React.Component{
                             placeholder={"I am going to starbucks and ..."}
                             ></TextInput>
                         </View>  
-                        {/* <View style={{marginTop:25}}>
-                            <Text style={styles.inputTitle}>Max Orders</Text>
-                            <TextInput 
-                            style={styles.input} 
-                            autoCapitalize="none"
-                            onChangeText={ max_orders => this.setState({max_orders})}
-                            value={this.state.max_orders}
-                            keyboardType='numeric'
-                            placeholder={"5"}
-                            ></TextInput>
-                        </View>    */}
+
                         <View style={{marginTop:32}}>
                             <Text style={styles.inputTitle}>When are you going there?</Text>
                             <DateTimePickerModal
@@ -231,6 +210,7 @@ export default class AddScheduledRun2 extends React.Component{
                                 onConfirm={handleConfirm}
                                 onCancel={hideDatePicker}
                                 minimumDate={new Date()}
+                                maximumDate={new Date(Moment(new  Date()).add(1, 'month'))}
                             />
                             <DateTimePickerModal
                                 mode="time"
@@ -244,7 +224,7 @@ export default class AddScheduledRun2 extends React.Component{
                                     <TouchableOpacity style={styles.button1} onPress={showTimePicker}>
                                             {this.state.scheduled_time != null &&
                                             <Text style={styles.buttonText1}>
-                                                {Moment(this.state.scheduled_time).format('hh:mm')}
+                                                {Moment(this.state.scheduled_time).format('hh:mm a')}
                                             </Text>   
                                             }
                                             {this.state.scheduled_time == null &&
@@ -268,14 +248,7 @@ export default class AddScheduledRun2 extends React.Component{
                                     </TouchableOpacity>
 
                                 </View>
-                                {/* <OptionsMenu
-                                button={require("../../assets/placeholder-add.jpg")}
-                                buttonStyle={{ width: 32, height: 20, margin: 7.5, resizeMode: "contain" }}
-                                destructiveIndex={1}
-                                options={["Private", "Public", "Cancel"]}
-                                /> */}
-                                {/* // actions={[this.setState({privacy:"private"}), this.setState({privacy:"public"})]}/> */}
-                        </View>   
+                          </View>   
                     </View>
                     <View>
                         <TouchableOpacity style={styles.button} onPress={this.handlePost.bind(this)}>
@@ -297,7 +270,9 @@ const styles = StyleSheet.create({
         width: "100%",
         flexDirection: "row",
         alignItems: "center",
-        zIndex:1 
+        zIndex:1,
+        marginTop:Platform.select({ ios: 0, android: 27 }),
+
     },
     openingView:{
         marginRight:32,

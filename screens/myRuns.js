@@ -6,6 +6,9 @@ import RunCard from '../components/runCard';
 import { Ionicons } from '@expo/vector-icons';
 import firebase from '@firebase/app';
 
+import Moment from 'moment';
+
+
 require('firebase/auth');
 class MyRuns extends React.Component {
     static navigationOptions = {
@@ -18,7 +21,7 @@ class MyRuns extends React.Component {
       this.state = {
         activeRuns: [],
         passedRuns: [],
-        completedRuns: [],
+        closedRuns: [],
         refreshing: false
       }
     }
@@ -59,6 +62,8 @@ class MyRuns extends React.Component {
         const results = await fetch(apiURL);
         const json = await results.json()
         const active = json.filter(run => run.status.includes('active'))
+        const closed = json.filter(run => run.status.includes('closed'))
+
         const active_future = active.filter(run => new Date(run.scheduled_time) >= new Date())
         const active_passed = active.filter(run => new Date(run.scheduled_time) <= new Date())
 
@@ -66,7 +71,7 @@ class MyRuns extends React.Component {
 
         this.setState({activeRuns:active_future})
         this.setState({passedRuns:active_passed})
-        this.setState({completedRuns:completed})
+        this.setState({closedRuns:closed})
       }
       catch (err){
           this.setState({errorMessage:error.message})
@@ -79,7 +84,7 @@ class MyRuns extends React.Component {
             <SafeAreaView>
 
               <TitleBar>
-                <Title>Your Runs</Title>
+                <Title>Your Cartz</Title>
                 <TouchableOpacity
                 onPress={()=>{
                   this.props.navigation.navigate("AddRun")
@@ -107,7 +112,7 @@ class MyRuns extends React.Component {
                 
                 <Subtitle>Open Cartz</Subtitle>
                 {this.state.activeRuns.length  ==  0 &&
-                  <Text>No Active Runs</Text>
+                  <Text>No active cart. Click "+" to start one</Text>
                 }
                 {this.state.activeRuns.sort(function(a,b){
                           return new Date(a.scheduled_time) - new Date(b.scheduled_time) ;
@@ -143,16 +148,16 @@ class MyRuns extends React.Component {
                         <RunCard 
                         CartTitle= {run.destination.name}
                         Progress={run.status}
-                        Time={run.scheduled_time}
+                        Time= {`Scheduled for ${Moment(run.scheduled_time).format("h:mm a, Do MMM, YYYY")}`}
                         Name={run.destination.formatted_address}
 
                         />
                   </TouchableOpacity>
                   ))} 
-                  {this.state.completedRuns.length > 0 &&
-                    <Subtitle>Completed Runs</Subtitle>
+                  {this.state.closedRuns.length > 0 &&
+                    <Subtitle>Closed Cartz</Subtitle>
                   }
-                  {this.state.completedRuns.sort(function(a,b){
+                  {this.state.closedRuns.sort(function(a,b){
                           return new Date(a.scheduled_time) - new Date(b.scheduled_time) ;
                   }).map((run, index) => (
                   <TouchableOpacity 
@@ -161,11 +166,11 @@ class MyRuns extends React.Component {
                       this.props.navigation.navigate("RunScreen", {
                       run: run
                       })}} >
-                  <RunCard 
-                  CartTitle= {run.destination.name}
-                  Progress={run.status}
-                  Time={run.scheduled_time}
-                  />
+                   <RunCard 
+                        CartTitle= {run.destination.name}
+                        Progress={run.status}
+                        Time= {`Scheduled for ${Moment(run.scheduled_time).format("h:mm a, Do MMM, YYYY")}`}
+                        Name={run.destination.formatted_address}/>
                   </TouchableOpacity>
                   ))} 
                 </ScrollView>
@@ -183,9 +188,9 @@ const Container = styled.View`
 `; 
 const TitleBar = styled.View`
   width: 100%;
-  margin-top: 20px;
   padding-left: 27px;
-  height: 60px;
+  height: 50px;
+  margin-top: ${Platform.select({ ios: `20px`, android: `60px` })};
 `;
 
 const Title = styled.Text`

@@ -10,6 +10,8 @@ require('firebase/auth');
 import LoadingScreen from "../screens/loadingScreen.js";
 import RegisterScreen from "../screens/auth/registerScreen";
 import LoginScreen from "../screens/auth/loginScreen";
+import IntroScreen from "../screens/introScreen";
+
 import PhoneNumberScreen from "../screens/auth/phoneNumberScreen";
 import AddAddress from "../screens/auth/addAddress"
 
@@ -37,7 +39,9 @@ FinalAuthStack.navigationOptions =  {
 }
 
 const AuthStack = createStackNavigator({
+    IntroScreen: IntroScreen,
     Login: LoginScreen,
+
     RegisterScreen: RegisterScreen,
     FinalAuthStack: FinalAuthStack
 })

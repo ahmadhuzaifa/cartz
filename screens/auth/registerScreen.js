@@ -75,6 +75,7 @@ export default class LoginScreen extends React.Component{
                             autoCapitalize="none" 
                             onChangeText={ email => this.setState({email})}
                             value={this.state.email}
+                            keyboardType={"email-address"}
                             />
                         </View>
                         <View style={{marginTop:32}}>

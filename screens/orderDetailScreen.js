@@ -4,6 +4,7 @@ import { ScrollView, View, Text } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Ionicons, EvilIcons, Entypo } from '@expo/vector-icons';
 import { StatusBar , KeyboardAvoidingView, Platform, StyleSheet} from "react-native";
+import Moment from 'moment';
 
 import firebase from '@firebase/app';
 require('firebase/auth');
@@ -11,7 +12,8 @@ import { Linking } from 'expo';
 import { SafeAreaView } from "react-native-safe-area-context";
 import Comment from "../components/Comment";
 
-
+const domain = "https://afternoon-brook-22773.herokuapp.com"
+// const domain = "http://127.0.0.1:5000"
 
 class OrderDetailScreen extends React.Component {
     
@@ -24,13 +26,14 @@ class OrderDetailScreen extends React.Component {
             requests:[],
             keyboardOffset: 0,
             message: "",
-            conversation: []
+            conversation: [],
+            run: this.props.navigation.getParam("run"),
+            order: this.props.navigation.getParam("order")
         }
 
 
     }
     componentDidMount() {
-
         this.handleConversation()
     }
 
@@ -43,7 +46,7 @@ class OrderDetailScreen extends React.Component {
 
     _keyboardDidShow(event) {
         this.setState({
-            keyboardOffset: event.endCoordinates.height - 10,
+            keyboardOffset: event.endCoordinates.height
         })
     }
 
@@ -75,10 +78,10 @@ class OrderDetailScreen extends React.Component {
 
 
     async handleConversation(){
-        // /pickup/<pickup_id>/orders
         const order = this.props.navigation.getParam("order");
-        const apiURL = `http://afternoon-brook-22773.herokuapp.com/api/order/${order.id}/conversation`
 
+        const apiURL = domain + `/api/order/${order.id}/conversation`
+        console.log(apiURL)
         try {
             let response = await fetch(apiURL)
             const json = await response.json()
@@ -92,7 +95,7 @@ class OrderDetailScreen extends React.Component {
         if (this.state.message.length > 0){
             const order = this.props.navigation.getParam("order");
 
-            const apiURL = `http://afternoon-brook-22773.herokuapp.com/api/order/${order.id}/comment`
+            const apiURL = domain+`/api/order/${order.id}/comment`
 
             const data = {
                 message: this.state.message,
@@ -123,19 +126,46 @@ class OrderDetailScreen extends React.Component {
             this.setState({message:""})
         }
     }
+    async closeOrder(){
+        const order = this.props.navigation.getParam("order");
+        const apiURL = domain+`/api/order/${order.id}/decline`
+        try {
+            let response = await fetch(apiURL)
+            const status = response.status
+            const json = await response.json()
+            if(status == 200 || status == 201){
+                this.setState({order: json})
+                this.handleConversation()
+            }
+            else{
+                this.setState({ errorMessage: json.message})
+            }
+        }
+        catch (error) {
+            this.setState({ errorMessage: error.message })
+        } 
+        this.setState({message:""})
+    }
     render(){
-        const { navigation } = this.props;
-        const order = navigation.getParam("order");
+        const { navigation } = this.props
+        const order = this.state.order;
+        console.log(order.active)
         const run = navigation.getParam("run");
+        const deliverer = run.user;
+        const request_user = order.user;
 
         return (
-            // <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
-
             <Container>
                 <SafeAreaView style={{flex: 1}}>
                     <StatusBar hidden />
                     <TopBar>
-                        <Title>{order.user.fullName}'s Order</Title>
+                        {firebase.auth().currentUser.uid ==  deliverer.id && 
+                        <Title>{request_user.fullName}</Title>
+                        }
+                        {firebase.auth().currentUser.uid == request_user.id && 
+                        <Title>{deliverer.fullName}</Title>
+                        }
+                        {/* <Title>{order.user.fullName}</Title> */}
                         <TouchableOpacity
                         onPress={() => {
                             this.props.navigation.goBack();
@@ -153,7 +183,10 @@ class OrderDetailScreen extends React.Component {
                             </CloseView>
                         </TouchableOpacity>
                     </TopBar>
-                    <ScrollView keyboardDismissMode={true}>
+                    <ScrollView 
+                    keyboardDismissMode={true}
+                    ref={ref => {this.scrollView = ref}}
+                    onContentSizeChange={() => this.scrollView.scrollToEnd({animated: false})}>
 
                     <Content>
                         <View>
@@ -162,17 +195,32 @@ class OrderDetailScreen extends React.Component {
                             <View key={index}>
                             {response.type == "request" && 
                               <OrderContainer>
-                                <TouchableOpacity>
+                                <TouchableOpacity onPress={()=>{
+                                        this.props.navigation.navigate("RequestDetailScreen", {
+                                            request: response,
+                                            run: run,
+                                            action: "view_order"
+                                        })
+                                }}>
+                                    <OrderSubtitle>By {response.user.fullName}</OrderSubtitle>
                                     <OrderTitle>{run.destination.name}</OrderTitle>
-                                    <OrderAddress>To: {order.user.house_address}</OrderAddress>
+                                    <OrderAddress>To: {request_user.house_address.formatted_address}</OrderAddress>
                                     <OrderItemContainer>
                                         {response.items.map((item, j) => 
                                         <View key={j}>
                                             <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-                                                <OrderItem>{item.quantity || 1} {item.name}</OrderItem>
-                                                <OrderItemPrice>${Number(item.estimated_price).toFixed(2)}</OrderItemPrice>
+                                                <OrderItem 
+                                                style={{ 
+                                                    textDecorationLine: `${item.available == false ? "line-through": "none"}`
+                                                }}>{item.quantity || 1} {item.name}</OrderItem>
+                                                <OrderItemPrice style={{ 
+                                                    textDecorationLine: `${item.available == false ? "line-through": "none"}`
+                                                }}>${Number(item.estimated_price).toFixed(2)}</OrderItemPrice>
                                             </View>
-                                            <OrderItemDescription>{item.description || ""}</OrderItemDescription>
+                                            <OrderItemDescription
+                                                style={{
+                                                    textDecorationLine: `${item.available == false ? "line-through": "none"}`
+                                            }}>{item.description || ""}</OrderItemDescription>
                                         </View>
                                         )}
                                     </OrderItemContainer>
@@ -180,14 +228,15 @@ class OrderDetailScreen extends React.Component {
                                     <OrderDescriptionContainer>
                                         <OrderDescriptionItem>{response.description}</OrderDescriptionItem>
                                     </OrderDescriptionContainer>
-                                    }
-    
+                                    }    
                                 </TouchableOpacity>
-                                {firebase.auth().currentUser.uid == run.user.id &&
+
+                                {response.request_status == 'Pending' && firebase.auth().currentUser.uid == deliverer.id &&
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-                                    <TouchableOpacity
-                                    onPress={()=>{
-                                    }}>
+                                        <TouchableOpacity
+                                        onPress={()=>{
+                                            this.closeOrder()
+                                        }}>
                                         <OrderButtonContainer>
                                             <Ionicons 
                                                 name="ios-close"
@@ -195,76 +244,93 @@ class OrderDetailScreen extends React.Component {
                                                 size={32}
                                                 color="#FCD460"/>
                                         </OrderButtonContainer>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                    onPress={()=>{
-                                    }}>
-                                        <OrderButtonContainer style={{width:150, backgroundColor:"green"}}>
-                                                    <OrderButtonTitle>Accept</OrderButtonTitle>
-                                        </OrderButtonContainer>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                    onPress={()=>{
-                                    }}>
-                                        <OrderButtonContainer>
-                                            <EvilIcons 
-                                                name="pencil"
-                                                size={32}
-                                                color="#FCD460"/>
-                                        </OrderButtonContainer>
-                                    </TouchableOpacity>
+                                        </TouchableOpacity>
+                                            <TouchableOpacity
+                                            onPress={()=>{
+                                                // this.props.navigation.navigate("RequestDetailScreen", {
+                                                //     request: response,
+                                                //     run: run
+                                                // })
+                                            }}>
+                                                <OrderButtonContainer style={{width:150, backgroundColor:"green"}}>
+                                                            <OrderButtonTitle>Accept</OrderButtonTitle>
+                                                </OrderButtonContainer>
+                                            </TouchableOpacity>
+                                        <TouchableOpacity
+                                        onPress={()=>{
+                                        }}>
+                                            <OrderButtonContainer>
+                                                <EvilIcons 
+                                                    name="pencil"
+                                                    size={32}
+                                                    color="#FCD460"/>
+                                            </OrderButtonContainer>
+                                        </TouchableOpacity>
+                                </View>}
+                                {response.request_status == 'Rejected' &&
+                                <View>
+                                    <Event>
+                                    {response.user.fullName} rejected this request
+                                    </Event>
+
                                 </View>
-                                
-                                }
-                            
+                                    }
+                                    {/* {response.request_status == 'Pending' && firebase.auth().currentUser.uid == response.user_id &&
+                                        <Event>
+                                            Pending
+                                        </Event>
+                                    } */}
                             </OrderContainer>
-                                
+                       
                             }
+                            
                             {response.type == "comment" && 
                                 <Comment
                                 Text={response.message}
                                 currentUserName={response.user.fullName}
-                                currentUser={response.user.id == firebase.auth().currentUser.uid}/>
+                                currentUser={response.user.id == firebase.auth().currentUser.uid}
+                                timeSent={Moment(response.time_created).format("h:mm a, Do MMM")}/>
                             }
                           </View>
                          
                         ))}
                        <View>
+                            {/* <Event>You accepted the request</Event>  */}
 
-                            {/* <Comment
-                            Text={"Hey can you get me these items. Thanks"}
-                            currentUserName="Huzaifa"
-                            currentUser={false}/>
-                            <Event>You accepted the request</Event> */}
-
-                
                             </View>
                         </View>
                     </Content>
                 </ScrollView>
-                <KeyboardAvoidingView 
-                style={{position: 'absolute', left: 0, right: 0, bottom: 0,}}
-                behavior={Platform.OS == "ios" ? "padding" : "height"}
-                >
-                    <View style={{ flexDirection: 'row', alignItems: 'stretch', backgroundColor: "white", width: '100%'}}>
-                        <MessageInput
-                        onChangeText={message => this.setState({ message: message })}
-                        value={this.state.message}
-                        placeholderTextColor='gray'
-                        placeholder="Send a chat"
-                        underlineColorAndroid='transparent'
-                        />
-                        <TouchableOpacity 
-                        onPress={()=> {
-                            this.handleSendText()
-                        }}>
-                            <ButtonText>Send</ButtonText>
-                        </TouchableOpacity>
-                        {/* <Button title="Send" style={{width:50, backgroundColor:"white", padding: 20}}></Button> */}
-
-                    </View>
-
-                </KeyboardAvoidingView>
+                {order.active == true &&
+                  <KeyboardAvoidingView 
+                  style={{position: 'absolute', left: 0, right: 0, bottom: 0,}}
+                  behavior={Platform.OS == "ios" ? "padding" : "height"}
+                  >
+                      <View style={{ flexDirection: 'row', alignItems: 'stretch', backgroundColor: "white", width: '100%'}}>
+                          <MessageInput
+                          onChangeText={message => this.setState({ message: message })}
+                          value={this.state.message}
+                          placeholderTextColor='gray'
+                          placeholder="Send a chat"
+                          underlineColorAndroid='transparent'
+                          multiline
+                          returnKeyType="send"
+  
+                          />
+                          <TouchableOpacity 
+                          onPress={()=> {
+                              this.handleSendText()
+                          }}>
+                              <ButtonText>Send</ButtonText>
+                          </TouchableOpacity>
+                          {/* <Button title="Send" style={{width:50, backgroundColor:"white", padding: 20}}></Button> */}
+  
+                      </View>
+  
+                  </KeyboardAvoidingView>
+                
+                }
+              
             </SafeAreaView>
            
         </Container>
@@ -316,7 +382,17 @@ const Event = styled.Text`
     font-style: italic;
     text-align: center;
     margin-top: 10px;
+    margin-bottom: 10px;
 `;
+const OrderSubtitle = styled.Text`
+    font-size: 15px;
+    color: gray;
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
+    font-weight: 500;    
+    margin-top: 10px;
+    margin-horizontal: 20px;
+`;
+
 const Content = styled.View `
     height: 100%;
     padding: 32px;
@@ -330,21 +406,20 @@ const OrderContainer = styled.View `
     borderRadius: 15px;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
     margin-bottom: 32px;
+    margin-top: 32px;
 `;
 const MessageInput = styled.TextInput `
-    height:60px;
     background-color: white;
-    padding-right: 20px;
-    padding-left: 20px;
+    padding: 20px;
     font-size: 15px;
     flex:1 ;
     align-content: stretch;
+    max-height: 100px;
 `;
 const OrderTitle = styled.Text `
     color: black;
     font-weight: 600;
     font-size: 22px;
-    padding-top: 20px;
     padding-right: 20px;
     padding-left: 20px;
     font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
@@ -394,6 +469,8 @@ const OrderItem = styled.Text `
     font-size: 16px;
     font-family: ${Platform.select({ ios: `Courier New`, android: `Roboto` })};
     text-transform: uppercase;
+    max-width:220px;
+
 `;
 const OrderItemDescription = styled.Text `
     color: #383838;
@@ -401,6 +478,7 @@ const OrderItemDescription = styled.Text `
     font-size: 15px;
     font-family: ${Platform.select({ ios: `Courier New`, android: `Roboto` })};
     padding-left: 30px;
+    
 `;
 
 const OrderItemPrice = styled.Text `

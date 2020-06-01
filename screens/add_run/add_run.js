@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import GooglePlacesInput from "../../components/googlePlacesSearch"
 import firebase from '@firebase/app';
 require('firebase/auth');
-require('firebase/firestore');
 const domain = "https://afternoon-brook-22773.herokuapp.com"
 
 export default class AddScheduledRun extends React.Component{
@@ -106,7 +105,7 @@ export default class AddScheduledRun extends React.Component{
                                 size={30} 
                                 color="#546bfb"/>
                         </TouchableOpacity>
-                        <Text style={styles.topBarText}>Add Run</Text>
+                        <Text style={styles.topBarText}>Open a cart</Text>
                     </View>
                     <ScrollView keyboardDismissMode={true}>
                     <Text style={styles.greeting}>{`Where are \nyou going?`}</Text>
@@ -145,7 +144,8 @@ const styles = StyleSheet.create({
         width: "100%",
         flexDirection: "row",
         alignItems: "center",
-        zIndex:1 
+        zIndex:1,
+        marginTop:Platform.select({ ios: 0, android: 27 }),
     },
     closeButton:{
         backgroundColor: "#FCD460",
@@ -163,9 +163,9 @@ const styles = StyleSheet.create({
        fontWeight: "600",
        fontSize: 19,
        fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
-        width:"100%",
-        textAlign:"center",
-        position:"absolute"
+       width:"100%",
+       textAlign:"center",
+       position:"absolute"
     },
     container:{
         flex: 1,

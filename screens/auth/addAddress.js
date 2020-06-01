@@ -8,6 +8,7 @@ require("firebase/firestore");
 
 const domain = "https://afternoon-brook-22773.herokuapp.com"
 
+// const domain = "http://127.0.0.1:5000"
 
 export default class AddAddress extends React.Component{
 
@@ -21,35 +22,42 @@ export default class AddAddress extends React.Component{
         headerShown:false
     }
 
-    async handlePost (address) {
-        const user = firebase.auth().currentUser;
-        const user_id = user.uid
-        const data = {
-            house_address:address
-        }
-        console.log(user_id)
-        try {
-            const apiURL = domain + `/api/users/${user_id}/address`
-            let response = await fetch(
-                apiURL,
-                {
-                    method: "PUT",
-                    headers: {
-                    "Accept": "application/json",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            });
-            if(response.status == 200 || response.status == 201){
-                this.props.navigation.goBack()
+    async setAddress(place_id){
+        // const location = this.props.navigation.getParam("location");
+        const user_id = firebase.auth().currentUser.uid
+        const apiURL = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&=&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA`
+        try{
+            const results = await fetch(apiURL);
+            const json = await results.json()
+            try {
+                const apiURL = domain + `/api/users/${user_id}/address`
+                const data ={
+                    house_address: json.result
+                }
+                let response = await fetch(
+                    apiURL,
+                    {
+                        method: "PUT",
+                        headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+                if(response.status == 200 || response.status == 201){
+                    this.props.navigation.goBack()
+                }
+                else{
+                    this.setState({ errorMessage: "An error occurred" })
+                }
             }
-            else{
-                this.setState({ errorMessage: "An error occurred" })
-            }
+            catch (error) {
+                this.setState({ errorMessage: error.message })
+            } 
         }
-        catch (error) {
-            this.setState({ errorMessage: error.message })
-        } 
+        catch (err){
+            this.setState({errorMessage:err.message})
+        }
     }
 
     async onChangeDestination (destination){
@@ -68,7 +76,7 @@ export default class AddAddress extends React.Component{
     render(){
         const predictions = this.state.predictions.map(prediction => (
             <TouchableOpacity key={prediction.id} onPress={()=>{
-                this.handlePost(prediction.description)
+                this.setAddress(prediction.place_id)
                 }} >
                 <View style={styles.predictionView}>
                     <Text style={styles.predictionText}>{prediction.structured_formatting.main_text}</Text>
@@ -85,7 +93,7 @@ export default class AddAddress extends React.Component{
                         onPress={() => {
                             this.props.navigation.goBack();
                         }}>
-                                <Text style={{color:"#503D9E", fontWeight:"600"}}>Later</Text>
+                                <Text style={{color:"#503D9E", fontWeight:"700", fontSize:16}}>Later</Text>
                         </TouchableOpacity>
                         <Text style={styles.topBarText}>Address</Text>
                     </View>
@@ -132,8 +140,6 @@ const styles = StyleSheet.create({
         zIndex:1 
     },
     closeButton:{
-        backgroundColor: "#FCD460",
-        borderRadius: 20,
         height: 55,
         width:70,
         right:20,

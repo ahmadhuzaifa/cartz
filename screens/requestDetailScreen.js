@@ -6,20 +6,17 @@ import { TextInput } from "react-native-gesture-handler";
 import Moment from 'moment';
 
 require('firebase/auth');
-
-
 const domain = "https://afternoon-brook-22773.herokuapp.com"
+
 // const domain = "http://127.0.0.1:5000"
 
-export default class RequestSummary extends React.Component{
+export default class RequestDetailScreen extends React.Component{
 
     state = { 
         location: [],
         errorMessage: null,
-        items: [],
-        itemsCount: 2,
-        user: null,
-        note: ""
+        request: this.props.navigation.getParam("request"),
+        total: null     
     }
 
     static navigationOptions = {
@@ -27,28 +24,22 @@ export default class RequestSummary extends React.Component{
     }
 
     componentDidMount() {
-        this.getAddress()
-
     }
 
-    async getAddress(){
-        const uid = firebase.auth().currentUser.uid
-        const apiURL = domain + `/api/users/${uid}`;
-        const results = await fetch(apiURL)
-        const json = await results.json()
-        this.setState({user: json})
-    }
-    async addRequest(){
-        const user = firebase.auth().currentUser;
-        const user_id = user.uid
-        const run = this.props.navigation.getParam("run");
-        const items = this.props.navigation.getParam("data");
-        const apiURL = domain + `/api/pickup/${run.id}/order`
-        const data = {
-            items: items,
-            user_id: user_id,
-            note: this.state.note
+    async submitRequest(){
+        const user_id = firebase.auth().currentUser.uid;
+        const request = this.state.request
+        const apiURL = domain + `/api/order/${request["order_id"]}/request`
+        if (this.state.total == null){
+            this.setState({error: "Please set a total price"})
+            return
         }
+        const data = {
+            items: this.state.request.items,
+            user_id: user_id,
+            total: Number(this.state.total)
+        }
+        console.log(data["items"])
         try {
             let response = await fetch( apiURL,
                 {
@@ -62,7 +53,7 @@ export default class RequestSummary extends React.Component{
                 const status = response.status
                 const json = await response.json()
                 if(status == 200 ||status == 201){
-                    this.props.navigation.dismiss()
+                    this.props.navigation.goBack()
                 }
                 else{
                     this.setState({ errorMessage: json.message})
@@ -74,12 +65,11 @@ export default class RequestSummary extends React.Component{
     }
 
     render(){
-        const run = this.props.navigation.getParam("run");
-        const items = this.props.navigation.getParam("data");
-
+        const request = this.state.request
+        const run = this.props.navigation.getParam("run")
+        const action = this.props.navigation.getParam("action")
         return(
             <View style={styles.container}>
-
                 <SafeAreaView style={{flex:1}}>
                     <View style={styles.topBar} >
                         <TouchableOpacity 
@@ -92,38 +82,14 @@ export default class RequestSummary extends React.Component{
                                 size={15} 
                                 color="#546bfb"/>
                         </TouchableOpacity>
-                        <Text style={styles.topBarText}>Request Summary</Text>
+                        <Text style={styles.topBarText}>Requested Items</Text>
                     </View>
 
                     <ScrollView keyboardDismissMode={true}>
-                        <Text style={styles.greeting}>{`Your 😎\nOrder`}</Text>
+                        <Text style={styles.greeting}>{`Requested Items`}</Text>
 
-                        <View style={styles.addressContainer}>
-                            <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'center'}}>
-                                {this.state.user != null &&
-                                <Text style={styles.addressText}>{this.state.user.house_address.formatted_address}</Text>
-                                // <Text style={styles.addressText}>000 address ct, Sacramento, CA</Text>
-
-                                }
-                                <TouchableOpacity
-                                onPress={()=>{
-                                    this.props.navigation.navigate("AddAddress")
-                                }}>
-                                    <Text style={styles.editText}>Edit</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'center'}}>
-                                <Text style={styles.timingText}>{Moment(run.scheduled_time).format(`h:mm a, Do MMM, YYYY`)}</Text>
-                                <TouchableOpacity
-                                onPress={()=>{
-                                    this.props.navigation.navigate("AddAddress")
-                                }}>
-                                    {/* <Text style={styles.editText}>Edit</Text> */}
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                    
                         {this.state.errorMessage != null &&(
-
                             <View style={styles.errorMessage}>
                                 {this.state.errorMessage && <Text style={styles.error}>{this.state.errorMessage}</Text>}
                             </View>
@@ -131,52 +97,107 @@ export default class RequestSummary extends React.Component{
 
                         <View style={styles.form}>
                             <View>
-                                {items.map((item, index) => (
+                                {this.state.request.items.map((item, index) => (
                                         <View key={index} style={{ borderBottomColor: '#C0C0C0',borderBottomWidth: StyleSheet.hairlineWidth, marginBottom: 10, paddingBottom: 15}}>
                                             <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'center'}}>
-                                            <Text multiline={true} style={styles.input}>{item.itemName}</Text>
+                                            <Text multiline={true} style={styles.input}>{item.name}</Text>
                                             <Text style={styles.price}>
-                                                ${item.price} x {item.quantity}
+                                                ${item.estimated_price} x {item.quantity}
                                             </Text>
                                         </View>
                                         <Text style={styles.inputDesc}>
                                                     {item.description}
                                         </Text>
-                                            {item.barcodeID.length != 0 &&(
+                                            {item.barcodeID != null &&(
                                                 <Text 
                                                 style={{height:20}}>
                                                     Barcode ID: {item.barcodeID}
                                                 </Text>
                                             )}
+                                            {action == "edit_order" && 
+                                            <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'center'}}>
+                                                <TouchableOpacity 
+                                                style={[styles.editButton,{
+                                                    backgroundColor: `${item.available != true ? "blue" : "white"}`,
+                                                }]}
+                                                onPress={()=>{
+                                                    let requestedItems = Object.assign({}, this.state.request);
+                                                    requestedItems.items[index].available = !requestedItems.items[index].available
+                                                    this.setState({request:requestedItems});
+                                                    console.log(requestedItems.items[index].available)
+                                                }}>
+                                                    <Text 
+                                                    style={[styles.editButtonText, 
+                                                    {
+                                                        color: `${item.available != true ? "white" : "blue"}`
+                                                    }]}>
+                                                        {item.available != true ? "Not available" : "Available"}
+                                                    </Text>
+                                                </TouchableOpacity>
+
+                                            </View>
+                                            }
                                         </View>
+                                        
                                 ))}
                                 </View>
-            
-                                <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'flex-start', marginBottom: 20, marginTop: 20}}>
-                                    <View>
-                                        <Text style={styles.totalTitle}>Estimated Total:</Text>
-                                        {/* <Text style={styles.serviceFeeText}>10% service fee</Text> */}
+                                {action == "view_order" && 
+                                   <View>
+                                        <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'flex-start', marginBottom: 20, marginTop: 20}}>
+                                            <View>
+                                                <Text style={styles.totalTitle}>Estimated Total Price:</Text>
+                                                <Text style={[styles.serviceFeeText,]}>these are only estimates</Text>
+                                            </View>
+                                            <Text style={styles.totalPriceTitle}>${Number(request.total).toFixed(2)}</Text>
+                                        </View>
+
+                                        {/* <Text style={[styles.serviceFeeText, {fontStyle: "italic"}]}>The items add up to ${request.total} after taxes. Click accept to let them know that they can buy the items!</Text> */}
+                                        {/* <TouchableOpacity 
+                                        style={[styles.button, {marginBottom: 10, marginTop: 10}]}
+                                        onPress={() => {
+                                            // this.submitRequest()
+                                        }}>
+                                            <Text style={styles.buttonText}>Accept</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity 
+                                        style={styles.button}
+                                        onPress={() => {
+                                            // this.submitRequest()
+                                        }}>
+                                            <Text style={styles.buttonText}>Decline</Text>
+                                        </TouchableOpacity> */}
                                     </View>
-                                    <Text style={styles.totalPriceTitle}>${Number(items.reduce(function(prev, cur) {return Number(prev) + (Number(cur.price)*Number(cur.quantity));}, 0)*1).toFixed(2)}</Text>
+                                }
+                                {action == "edit_order" && 
+                                <View style={{marginBottom: 10}}>
+                                   <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'flex-start', marginBottom: 5, marginTop: 20}}>
+                                       <View>
+                                       <Text style={styles.totalTitle}>Total:</Text>
+                                       <Text style={styles.serviceFeeText}>including taxes and other costs</Text>
+                                       </View>
+                                       <TextInput 
+                                       style={styles.totalPriceTitle}
+                                       placeholder={Number(request.items.reduce(function(prev, cur) {return Number(prev) + (Number(cur.estimated_price)*Number(cur.quantity));}, 0)*1.0).toFixed(2)}
+                                       onChangeText={ total => this.setState({total: total})}
+                                       value={this.state.total}
+                                       keyboardType={"numeric"}
+                                       />
+                                   </View>
+                                   <Text style={[styles.serviceFeeText, {fontStyle: "italic"}]}>The total amount is amount that you will get reimbursed once you complete the order. Make sure it corresponds with your receipt.</Text>
+                                   <View>
+                                   <TouchableOpacity 
+                                    style={styles.button}
+                                    onPress={() => {
+                                        this.submitRequest()
+                                    }}>
+                                        <Text style={styles.buttonText}>Submit</Text>
+                                    </TouchableOpacity>
+                                    </View>
+
                                 </View>
-                                <TextInput 
-                                style={styles.note} 
-                                onChangeText={ note => this.setState({note: note})}
-                                value={this.state.note}
-                                placeholder="Add a note.."
-                                multiline
-                                ></TextInput>
+                               }
                             </View>
-                                
-                            <View>
-                            <TouchableOpacity 
-                            style={styles.button}
-                            onPress={() => {
-                                this.addRequest()
-                            }}>
-                                <Text style={styles.buttonText}>Submit</Text>
-                            </TouchableOpacity>
-                        </View>
+          
                     </ScrollView>
                 </SafeAreaView>
             </View>
@@ -298,6 +319,16 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         color:"white",
         marginBottom: 300
+    },
+    button:{
+        marginHorizontal: 30,
+        backgroundColor: "#503D9E",
+        borderRadius: 4,
+        height: 52,
+        alignItems: "center",
+        justifyContent: "center",
+        color:"white",
+        marginBottom: 300
 },
     AddButton:{
         backgroundColor: "#503D9E",
@@ -402,5 +433,16 @@ const styles = StyleSheet.create({
     price:{
         fontFamily: Platform.select({ ios: `Avenir Next`, android: `Roboto` }),
         fontWeight: "600",
+    },
+    editButton:{
+        padding: 5,
+        marginTop: 10,
+        borderWidth: 1,
+        borderColor: "blue",
+        borderRadius: 6
+    },
+    editButtonText:{
+        color: "blue",
+
     }
 })

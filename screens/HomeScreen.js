@@ -34,6 +34,7 @@ function mapDispatchToProps(dispatch){
     }
 }
 const domain = "https://afternoon-brook-22773.herokuapp.com"
+// const domain = "http://127.0.0.1:5000"
 
 class HomeScreen extends React.Component {
 
@@ -43,8 +44,7 @@ class HomeScreen extends React.Component {
       email: "",
       displayName:"",
       runs_array:[],
-      latitude: null,
-      longitude: null
+      address_available: true
     };
 
     static navigationOptions = {
@@ -55,10 +55,10 @@ class HomeScreen extends React.Component {
     }
 
     componentDidMount(){
-      const {email, displayName} = firebase.auth().currentUser
+      const {email, displayName, uid} = firebase.auth().currentUser
       this.setState({email, displayName});
       StatusBar.setBarStyle("dark-content", true)
-      this.setUpRuns()
+      this.getRuns()
       this.checkAddress()
     }
 
@@ -68,50 +68,31 @@ class HomeScreen extends React.Component {
 
       try {
         let response = await fetch( apiURL)
-        console.log(response.status)
         const json = await response.json()
         if(response.status == 200 ||response.status == 201 ||response.status == 400){
           if(json.house_address != null){
             this.props.navigation.navigate("App")
-
+            this.setState({address_available: true})
           }
           else{
             this.props.navigation.navigate("AddAddress")
+            this.setState({address_available: false})
           }
         }
         else{
-          this.props.navigation.navigate("Auth")
         }
       }
       catch (error) {
           this.setState({ errorMessage: error.message })
-          console.log(error)
 
       }
     }
 
-    async setUpRuns(){
-      navigator.geolocation.getCurrentPosition(
-        position =>{
-          let region = {
-            latitude: parseFloat(position.coords.latitude),
-            longitude: parseFloat(position.coords.longitude),
-            latitudeDelta: 5,
-            longitudeDelta: 5
-        };
-        this.setState({location:region} , () => {
-          console.log(region)
-          this.getRuns();
-      })
-      },
-      error => alert(error.message),
-      );
-    }
 
     async getRuns(){ 
       const uid = firebase.auth().currentUser.uid
-      const radius = 30
-      const apiURL = domain + `/api/pickups?id=${uid}&lat=${this.state.location.latitude}&lng=${this.state.location.longitude}&radius=${radius}`;
+      const radius = 15
+      const apiURL = domain + `/api/pickups?user_id=${uid}&radius=${radius}`;
       try{
         const results = await fetch(apiURL);
         const json = await results.json()
@@ -195,11 +176,15 @@ class HomeScreen extends React.Component {
                         </TouchableOpacity>
                         <Title>Welcome back!</Title>
                         <Name>Hi {this.state.displayName}!</Name>
-                        <Ionicons 
-                        name="ios-notifications" 
-                        size={32} 
-                        color="#503D9E"
-                        style={{ position: "absolute", right:20, top:5}} />
+                        <TouchableOpacity
+                        style={{ position: "absolute", right:25, top:5}}
+                        >
+                          <Ionicons 
+                          name="ios-notifications" 
+                          size={32} 
+                          color="#503D9E" />
+                        </TouchableOpacity>
+
                     </TitleBar>
                     <Subtitle>Shortcuts</Subtitle>
             
@@ -217,16 +202,19 @@ class HomeScreen extends React.Component {
                         Image={require('../assets/truck.png')}
                         Text="Schedule" />
                       </TouchableOpacity>    
-                      <TouchableOpacity>
+                      {/* <TouchableOpacity>
                         <Action 
                         Image={require('../assets/request.png')}
                         Text="Request" />
-                      </TouchableOpacity>    
+                      </TouchableOpacity>     */}
                     </ScrollView>
 
                     <Subtitle style={{marginTop:5}}>Scheduled Cartz</Subtitle>
                     {this.state.runs_array.length ==  0 &&
-                    <Text>No Active Cartz Near You</Text>
+                      <Text>No active cartz near you</Text>
+                    }
+                    {this.state.address_available == false &&
+                      <Text>Please add your address </Text>
                     }
                     <ScrollView 
                     horizontal={false} 
@@ -279,7 +267,7 @@ export default connect(
 const RootView = styled.View`
     background:black;
     flex: 1;
-    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};;
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
 
 `
 
@@ -331,7 +319,7 @@ const Name = styled.Text`
 
 const TitleBar = styled.View`
   width: 100%;
-  margin-top: 50px;
+  margin-top: ${Platform.select({ ios: `30px`, android: `60px` })};
   padding-left: 80px;
 `;
 

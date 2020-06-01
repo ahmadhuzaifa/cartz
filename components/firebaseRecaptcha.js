@@ -30,20 +30,23 @@ export default function VerifyRecaptcha(props) {
             <View style={styles.form}>
                 <View>
                     <Text style={styles.inputTitle}>Phone Number</Text>
-                    <TextInput 
-                    style={styles.input} 
-                    autoCapitalize="none" 
-                    onChangeText={ phoneNumber => setPhoneNumber(phoneNumber)}
-                    value={phoneNumber}
-                    placeholder={"+1916....."}
-                    keyboardType='numeric'
+                    <View style={{flexDirection:"row",justifyContent:'space-between',alignItems: 'center'}}>
+                        <Text>+1</Text>
+                        <TextInput 
+                        style={styles.input} 
+                        autoCapitalize="none" 
+                        onChangeText={ phoneNumber => setPhoneNumber(phoneNumber)}
+                        value={phoneNumber}
+                        placeholder={"916....."}
+                        keyboardType='phone-pad'
+                        />
+                    </View>
 
-                    />
                 </View> 
                 <TouchableOpacity style={styles.button} onPress={
                 async () => {
                     firebase.auth().settings.appVerificationDisabledForTesting = true;
-                firebase.auth().currentUser.linkWithPhoneNumber(phoneNumber, recaptchaVerifierRef.current)
+                firebase.auth().currentUser.linkWithPhoneNumber("+1"+(phoneNumber), recaptchaVerifierRef.current)
                 .then(function (confirmationResult) {
                     if(confirmationResult){
                         changeErrorMessage("")
@@ -55,7 +58,7 @@ export default function VerifyRecaptcha(props) {
                 .catch(error => changeErrorMessage(error.message))
                 }}
             >
-            <Text style={styles.buttonText}>Send Code</Text>
+                <Text style={styles.buttonText}>Send Code</Text>
             </TouchableOpacity>
             </View>  
             }
@@ -75,6 +78,7 @@ export default function VerifyRecaptcha(props) {
                 <TouchableOpacity style={styles.button} onPress={
                     async () => {
                         confirmation.confirm(code).then(function (result) {
+                            if(result){
                             const user = firebase.auth().currentUser;
                             const user_id = user.uid
                             const data = {
@@ -84,7 +88,6 @@ export default function VerifyRecaptcha(props) {
                                 phoneNumber:user.phoneNumber
                             }
                             const apiURL = domain + "/api/users"
-                            console.log(apiURL)
                             try {
                                 let response = fetch(
                                     apiURL,
@@ -95,19 +98,23 @@ export default function VerifyRecaptcha(props) {
                                         "Content-Type": "application/json"
                                     },
                                     body: JSON.stringify(data)
-                                });
-                                if(response.status == 200 || response.status == 201){
-                                    changeErrorMessage("")
-                                    props.navigation.navigate('App')
-                                }
-                                else{
-                                    console.log(response.status)
-                                    changeErrorMessage("An error occurred")
-                                }
+                                }).then((res) => {
+
+                                    if(res.status == 200 || res.status == 201){
+                                        changeErrorMessage("")
+                                        props.navigation.navigate('App')
+                                    }
+                                    else{
+                                        changeErrorMessage("An error occurred")
+                                    }
+                                })
+
+
                             }
                             catch (error) {
                                 changeErrorMessage(error.message)
                             }
+                        }
                         }).catch(function (error) {
                             changeErrorMessage(error.message)                            
                         })
@@ -197,7 +204,8 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "400",
         color: "black",
-        height: 60
+        height: 60,
+        width: "90%",
     },
     inputCode:{
         borderBottomColor: "#503D9E",

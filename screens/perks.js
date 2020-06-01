@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, SafeAreaView, TouchableOpacity, Animated, Easing, StatusBar } from 'react-native';
+import { ScrollView, SafeAreaView, Text, Animated, Easing, StatusBar } from 'react-native';
 import styled from 'styled-components';
 import Card from '../components/card';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,7 +20,6 @@ class Perks extends React.Component {
                         color="#503D9E"
                         style={{ position: "absolute", right:20, top:5}} />
                     </TitleBar>
-
 
                         </SafeAreaView>
 

@@ -21,6 +21,9 @@ import firebase from '@firebase/app';
 require('firebase/auth');
 
 
+const domain = "https://afternoon-brook-22773.herokuapp.com"
+// const domain = "http://127.0.0.1:5000"
+
 class RunScreen extends React.Component {
     
     static navigationOptions = {
@@ -74,7 +77,7 @@ class RunScreen extends React.Component {
             } 
         }
         else{
-            const apiURL = `http://afternoon-brook-22773.herokuapp.com/api/pickup/${run.id}/orders?user_id=${user_id}`
+            const apiURL = `http://afternoon-brook-22773.herokuapp.com/api/pickup/${run.id}/orders/by/user?user_id=${user_id}`
             try {
                 let response = await fetch( apiURL)
                 const json = await response.json()
@@ -84,6 +87,26 @@ class RunScreen extends React.Component {
                 this.setState({ errorMessage: error.message })
             } 
         }
+    }
+
+    async closeRun(){
+        const run = this.props.navigation.getParam("run");
+        const user_id = firebase.auth().currentUser.uid
+        if(run.user.id == user_id){
+            const apiURL = domain + `/api/pickup/${run.id}/close`
+            try {
+                let response = await fetch( apiURL)
+                const json = await response.json()
+                const status = response.status
+                if(status == 200 ||status == 201){
+                    this.props.navigation.dismiss()
+                }
+            }
+            catch (error) {
+                this.setState({ errorMessage: error.message })
+            } 
+        }
+ 
     }
     render(){
         const { navigation } = this.props;
@@ -135,7 +158,7 @@ class RunScreen extends React.Component {
                                 <Avatar />
                                 <AvatarTextContainer>
                                     <AvatarText>{run.user.fullName}</AvatarText>
-                                    <AvatarSubtitleText>Rating 4.8 - Cartz Verifed</AvatarSubtitleText>
+                                    <AvatarSubtitleText>Your neighbor</AvatarSubtitleText>
                                 </AvatarTextContainer>
                             </AvatarContainer>
                           </TouchableOpacity>
@@ -190,13 +213,13 @@ class RunScreen extends React.Component {
                                     </OpenTimingsView>
                                 </View>
                                 }
-                                 {this.state.response.length == 0 &&
+                                 {this.state.response == 0 &&
                                     <TouchableOpacity
                                     onPress={()=>{this.props.navigation.navigate("RequestScreen", {
                                         run: run
                                     })}}>
                                         <RequestButton>
-                                            <RequestButtonText>Request an item</RequestButtonText>
+                                            <RequestButtonText>Request items</RequestButtonText>
                                         </RequestButton>
                                     </TouchableOpacity>
                                  }   
@@ -215,14 +238,26 @@ class RunScreen extends React.Component {
                             }
                         {run.user_id == firebase.auth().currentUser.uid &&
                         <View>
+                            {this.state.requests.length == 0 &&
+                            <View style={{width:"100%", height:30}}>
+                                <Text style={{textAlign: "center" }}>No requests yet. Share your cart</Text>
+                            </View>
+                            }
+
                             {this.state.requests.map((order, index) => (
                             <OrderContainer key={index}>
                             <TouchableOpacity>
                                 <OrderTitle>{order.user.fullName}</OrderTitle>
-                                <OrderAddress>{order.user.house_address}</OrderAddress>
+                                {order.user.house_address != null &&
+                                <OrderAddress>{order.user.house_address.formatted_address}</OrderAddress>
+                                }
+                                {order.requests[0] &&
+
                                 <OrderItemContainer>
-                                    {order.requests[0].items.map((item, j) => <OrderItem key={j}>{item.quantity || 1} x {item.name}</OrderItem>)}
+                                        {order.requests[0].items.map((item, j) => <OrderItem key={j}>{item.quantity || 1} x {item.name}</OrderItem>)}
                                 </OrderItemContainer>
+                                }
+
                                 {order.description != null &&
                                 <OrderDescriptionContainer>
                                     <OrderDescriptionItem>{order.description}</OrderDescriptionItem>
@@ -242,20 +277,21 @@ class RunScreen extends React.Component {
                             </View>
                         </OrderContainer>
                           ))} 
-                            <TouchableOpacity>
+                            {/* <TouchableOpacity>
                                 <RequestButton style={{backgroundColor:"gray", marginTop: 10}}>
-                                    <RequestButtonText>Edit Run</RequestButtonText>
+                                    <RequestButtonText>Edit Cart</RequestButtonText>
                                 </RequestButton>
-                            </TouchableOpacity>
-
+                            </TouchableOpacity> */}
+                            {run.status == "active" &&
                             <TouchableOpacity
                             onPress={()=>{
-                                this.props.navigation.dismiss()
+                                this.closeRun()
                             }}>
                                 <RequestButton style={{backgroundColor:"red", marginTop: 10}}>
-                                    <RequestButtonText>Close Run</RequestButtonText>
+                                    <RequestButtonText>Close Cart</RequestButtonText>
                                 </RequestButton>
                             </TouchableOpacity>
+                            }
                         </View>
                     }                        
                     </Content>
@@ -359,7 +395,12 @@ const OrderTitle = styled.Text `
     padding-right: 20px;
     padding-left: 20px;
     font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
-;
+`;
+const EmptyText = styled.Text `
+    color: gray;
+    font-weight: 600;
+    font-size: 15px;
+    font-family: ${Platform.select({ ios: `Avenir Next`, android: `Roboto` })};
 `;
 const OrderAddress = styled.Text `
     color: #7a7a7a;

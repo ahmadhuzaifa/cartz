@@ -9,14 +9,16 @@ import MyRuns from "../screens/myRuns"
 import Perks from "../screens/perks"
 import AddScheduledRun from "../screens/add_run/add_run";
 import AddScheduledRun2 from "../screens/add_run/add_run2";
+import CartConfirmation from "../screens/add_run/cart_confirmation";
 import RequestScreen from "../screens/requests/requestScreen";
 import RequestItemScreen from "../screens/requests/requestItemScreen"
 import BarcodeScanView from "../screens/barcodeScan"
 import RequestSummary from "../screens/requests/requestSummary"
 import OrderDetailScreen from "../screens/orderDetailScreen"
+import RequestDetailScreen from "../screens/requestDetailScreen.js"
 
 
-import { Ionicons, FontAwesome5, Entypo } from "@expo/vector-icons"
+import { Ionicons, FontAwesome5, Entypo, Feather } from "@expo/vector-icons"
 import AddAddress from "../screens/auth/addAddress";
 
 const activeColor = "#503D9E";
@@ -26,7 +28,8 @@ const inactiveColor = "#b8bece";
 
 const AddRun = createStackNavigator({
     AddRun1: AddScheduledRun,
-    AddRun2: AddScheduledRun2
+    AddRun2: AddScheduledRun2,
+    CartConfirmation: CartConfirmation
 })
 AddRun.navigationOptions =  {
     headerShown:false
@@ -38,7 +41,8 @@ const RunStack = createStackNavigator({
     RequestItemScreen:RequestItemScreen,
     RequestSummary: RequestSummary,
     BarcodeScanner: BarcodeScanView,
-    OrderDetailScreen: OrderDetailScreen
+    OrderDetailScreen: OrderDetailScreen,
+    RequestDetailScreen: RequestDetailScreen
 })
 RunStack.navigationOptions =  {
     headerShown:false
@@ -49,7 +53,7 @@ const HomeStack = createStackNavigator({
     Home: HomeScreen,
     AddRun: AddRun,
     AddAddress: AddAddress, 
-    RunStack: RunStack
+    RunStack: RunStack,
 }, 
 {
     mode: "modal"
@@ -90,9 +94,18 @@ PerksStack.navigationOptions = {
 
 
 const OrderStack = createStackNavigator({
-    Order: OrdersScreen
+    Order: OrdersScreen,
+    OrderDetailScreen: OrderDetailScreen,
+    RequestDetailScreen: RequestDetailScreen
 });
-OrderStack.navigationOptions = {
+OrderStack.navigationOptions = ({ navigation }) => {
+    var tabBarVisible = true;
+    const routeName = navigation.state.routes[navigation.state.index].routeName;
+    if (routeName == "OrderDetailScreen" || routeName == "RequestDetailScreen")  {
+        tabBarVisible = false;
+    }
+    return {
+    tabBarVisible,
     tabBarLabel: "My Orders",
     tabBarIcon: ({focused}) => (
         <Entypo
@@ -100,8 +113,11 @@ OrderStack.navigationOptions = {
         size={26}
         color={focused ? activeColor : inactiveColor}
         />
+
     )
+    }
 };
+
 
 
 
@@ -121,10 +137,10 @@ RunsStack.navigationOptions = ({ navigation }) => {
     }
     return {
     tabBarVisible,
-    tabBarLabel: "My Runs",
+    tabBarLabel: "My Cartz",
     tabBarIcon: ({focused}) => (
-        <FontAwesome5
-        name="running" size={24}
+        <Entypo
+        name="shopping-cart" size={26}
         color={focused ? activeColor : inactiveColor}/>
     )
     }
@@ -134,7 +150,7 @@ RunsStack.navigationOptions = ({ navigation }) => {
 
 const TabNavigator = createBottomTabNavigator({
     HomeStack,
-    PerksStack,
+    // PerksStack,
     RunsStack,
     OrderStack,
 },

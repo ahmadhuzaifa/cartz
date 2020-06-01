@@ -79,8 +79,8 @@ class Menu extends React.Component {
                     </TouchableOpacity>
                     <Content>
                         <MenuItem icon="ios-settings" title="Account" text="Setting" />
-                        <MenuItem icon="ios-card" title="Billing" text="Payment" />
-                        <MenuItem icon="ios-settings" title="History" text="My Orders" />
+                        {/* <MenuItem icon="ios-card" title="Billing" text="Payment" /> */}
+                        {/* <MenuItem icon="ios-settings" title="History" text="My Orders" /> */}
                         <TouchableOpacity
                         onPress={this.signOutUser}>
                             <MenuItem icon="ios-exit" title="Logout" text="See you soon!" />

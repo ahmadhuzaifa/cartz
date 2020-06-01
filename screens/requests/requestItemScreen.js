@@ -76,8 +76,8 @@ export default class RequestItemScreen extends React.Component{
                 description: this.state.description,
                 barcodeID: this.state.barcodeData,
                 images: this.state.images,
-                price: this.state.price,
-                quantity: this.state.quantity || "1"
+                price: Number(this.state.price).toFixed(2),
+                quantity: this.state.quantity || 1
             };
     
             this.props.navigation.state.params.addRequestItemData(data);
