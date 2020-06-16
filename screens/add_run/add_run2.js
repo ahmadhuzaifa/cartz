@@ -99,14 +99,13 @@ export default class AddScheduledRun2 extends React.Component{
                 })
             },
             error => this.setState({errorMessage: error.message}),
-            // {maximumAge: 2000, timeout:20000}
+            {maximumAge: 2000, timeout:20000}
         )    
     }
 
     async getAddress(){
         const location = this.props.navigation.getParam("location");
         const apiURL = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${location.place_id}&=&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA`
-
         // const apiURL = `https://maps.googleapis.com/maps/api/geocode/json?address=${location.description}&key=AIzaSyBAvGGrNTSL5gSTLUDtaqzBObAUnze6JfA`
 
         try{

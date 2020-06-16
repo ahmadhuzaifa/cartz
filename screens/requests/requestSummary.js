@@ -8,6 +8,8 @@ import Moment from 'moment';
 require('firebase/auth');
 
 
+
+
 const domain = "https://afternoon-brook-22773.herokuapp.com"
 // const domain = "http://127.0.0.1:5000"
 
@@ -158,6 +160,15 @@ export default class RequestSummary extends React.Component{
                                         {/* <Text style={styles.serviceFeeText}>10% service fee</Text> */}
                                     </View>
                                     <Text style={styles.totalPriceTitle}>${Number(items.reduce(function(prev, cur) {return Number(prev) + (Number(cur.price)*Number(cur.quantity));}, 0)*1).toFixed(2)}</Text>
+                                </View>
+                                <View style={{height:60}}>
+                                    <TouchableOpacity>
+                                        <View>
+                                            <Text style={{color:"gray"}}>
+                                            No card on file. Add a card to receive payments
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
                                 </View>
                                 <TextInput 
                                 style={styles.note} 

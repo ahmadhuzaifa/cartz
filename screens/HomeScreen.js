@@ -60,6 +60,7 @@ class HomeScreen extends React.Component {
       StatusBar.setBarStyle("dark-content", true)
       this.getRuns()
       this.checkAddress()
+      
     }
 
     async checkAddress(){

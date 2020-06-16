@@ -7,7 +7,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "splash": {
@@ -23,7 +23,9 @@
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.cyfer.cartz"
+      "bundleIdentifier": "com.cyfer.cartz",
+      "buildNumber": "1.0.1"
+
     },
     "android": {
       "intentFilters": [
@@ -40,7 +42,9 @@
           ]
         }
       ],
-      "package": "com.cyfer.cartz"
+      "package": "com.cyfer.cartz",
+      "versionCode": 2
+
     },
     "description": "https://cartz.webflow.io/",
     "scheme": "cartz"
